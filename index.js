@@ -62,17 +62,14 @@ void main(void) {
   let editorSetting = {
     enableBasicAutocompletion: true,
     enableSnippets: true,
-    enableLiveAutocompletion: true
+    enableLiveAutocompletion: true,
+    tabSize: 2,
+    useSoftTabs: true,
+    theme: "ace/theme/dracula",
+    mode: "ace/mode/glsl"
   }
-  let editorTheme = "ace/theme/dracula";
-  let editorCode = "ace/mode/glsl"
   var editorVertex = ace.edit("vertex-shader-code");
   var editorFragment = ace.edit("fragment-shader-code");
-  editorVertex.setTheme(editorTheme);
-  editorFragment.setTheme(editorTheme);
-  editorVertex.getSession().setMode(editorCode);
-  editorFragment.getSession().setMode(editorCode);
-
   editorVertex.setOptions(editorSetting);
   editorFragment.setOptions(editorSetting);
   
