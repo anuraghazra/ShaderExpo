@@ -18,6 +18,12 @@ experiment with basic webgl shaders.
 
 -----------------
 
+### :memo: TODO
+- [ ] Add 3D Models
+- [ ] More Shader Variables
+- [ ] Saving Shaders
+- [ ] OOP
+ 
 Contributions are welcome.
 
 :star: Support the project by giving it a star :star:

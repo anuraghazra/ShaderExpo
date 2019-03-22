@@ -72,7 +72,7 @@ void main(void) {
   var editorFragment = ace.edit("fragment-shader-code");
   editorVertex.setOptions(editorSetting);
   editorFragment.setOptions(editorSetting);
-  
+
   editorVertex.session.setValue(vertexShaderValue, 1);
   editorFragment.session.setValue(fragmentShaderValue, 1);
 
