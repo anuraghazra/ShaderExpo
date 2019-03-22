@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.preloader {
+  display: flex;
+  text-align: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #7543fe;
+  color: white;
+  z-index: 1000;
+}
+
+.preloader > div {
+  margin: auto;
+}
+
+.loader {
+  margin: 20px;
+  border: 10px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 10px solid #b59aff;
+  width: 80px;
+  height: 80px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+.hide {
+  display: none;
+}
+
+.wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+.error {
+  display: none;
+  position: absolute;
+  padding: 10px;
+  width: 50%;
+  left: 0;
+  top: 0;
+  color: white;
+  overflow: auto;
+  font-size: 14px;
+  font-family: 'consolas';
+}
+
+.show {
+  display: block;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor {
+  height: 50%;
+}
+
+canvas {
+  outline: 1px solid black;
+}
+
+#run-shader {
+  cursor: pointer;
+  position: absolute;
+  left: 93%;
+  top: 90%;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border: 2px solid white;
+  outline: none;
+  border-radius: 50%;
+  font-size: 12px;
+  transition: 0.2s;
+  opacity: 0.5;
+  color: #7543fe;
+  transform: scale(1);
+  z-index: 1000;
+}
+
+.fa-play {
+  margin-left: 5px;
+}
+
+#run-shader:hover {
+  transform: scale(1.1);
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#run-shader:hover .button-ui {
+  opacity: 1;
+  height: 100px;
+  transition: 0.3s;
+}
+
+.button-ui {
+  opacity: 0;
+  width: 40px;
+  height: 50px;
+  background-color: white;
+  border-radius: 50px;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: -1;
+  transition: 0.3s;
+  padding-top: 10px;
+}
+
+#vertex-shader-code {
+  border-bottom: 5px solid white;
+}
+
+/* CHECKBOX */
+
+label {
+  text-align: center;
+  flex: 1;
+  cursor: pointer;
+  color: #383A3F;
+  display: block;
+  margin-left: 2px;
+  font-size: 1.2em;
+}
+
+input[type="checkbox"]+.label-text:hover:before {
+  color: #7543fe;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"]+.label-text:before {
+  content: "";
+  color: #dddfe6;
+  font-family: "fontAwesome";
+  line-height: 1;
+  width: 1em;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+input[type="checkbox"]:checked+.label-text:before {
+  content: "";
+  color: #7543fe;
+  animation: tick 150ms ease-in;
+}
+
+input[type="checkbox"]:disabled+.label-text:before {
+  content: "";
+  color: #dddfe6;
+}
+
+@keyframes tick {
+  0% {
+    transform: scale(0);
+  }
+  90% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

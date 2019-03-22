@@ -1,5 +1,4 @@
 ///<reference path="webgl.d.ts" />
-
 window.onload = function () {
   const width = window.innerWidth / 2;
   const height = window.innerHeight;
@@ -12,28 +11,73 @@ window.onload = function () {
    */
   const gl = glcanvas.getContext('webgl');
 
+  const vertexShaderValue = `// Vertex Shader
+attribute vec2 aVertexPos;
+attribute vec2 aTexCoord;
+
+uniform float mousex;
+uniform float mousey;
+uniform float uTime;
+
+varying vec2 vTexCoord;
+
+void main(void) {
+  vTexCoord = aTexCoord;
+  gl_Position = vec4(aVertexPos + vec2(mousex, mousey), 0.0, 1.0);
+}
+  `
+  const fragmentShaderValue = `// Fragment Shader
+precision highp float;
+
+varying vec2 vTexCoord;
+
+uniform float uTime;
+uniform float mousex;
+uniform float mousey;
+
+uniform sampler2D uSampler;
+
+void main(void) {
+  vec2 p = -1.0 + vTexCoord * 2.0;
+  float px = p.x + sin(mousex);
+  float py = p.y + cos(uTime);
+  float r = 1.0 - sqrt(px * px + py * py);
+  float lightStrength = clamp(1.0 + sin(uTime) + 0.5, 1.0, 5.0) * 2.0;
+  vec4 texel = texture2D(uSampler, vTexCoord);
+
+  gl_FragColor = vec4(texel.rgb * r * lightStrength, 1.0);
+}
+`;
+
 
   // CODE EDITOR
+  const DOMPreloader = id('preloader');
   const DOMRun = id('run-shader');
   const DOMError = id('error-msg');
+  const DOMVertexDiv = id('vertex-shader-code');
+  const DOMFragmentDiv = id('fragment-shader-code');
+  const DOMLiveEdit = id('live-edit');
 
+  DOMPreloader.classList.add('hide');
+  let editorSetting = {
+    enableBasicAutocompletion: true,
+    enableSnippets: true,
+    enableLiveAutocompletion: true
+  }
+  let editorTheme = "ace/theme/dracula";
+  let editorCode = "ace/mode/glsl"
   var editorVertex = ace.edit("vertex-shader-code");
   var editorFragment = ace.edit("fragment-shader-code");
-  editorVertex.setTheme("ace/theme/dracula");
-  editorFragment.setTheme("ace/theme/dracula");
-  editorVertex.getSession().setMode("ace/mode/glsl");
-  editorFragment.getSession().setMode("ace/mode/glsl");
+  editorVertex.setTheme(editorTheme);
+  editorFragment.setTheme(editorTheme);
+  editorVertex.getSession().setMode(editorCode);
+  editorFragment.getSession().setMode(editorCode);
 
-  editorVertex.setOptions({
-    enableBasicAutocompletion: true,
-    enableSnippets: true,
-    enableLiveAutocompletion: true
-  });
-  editorFragment.setOptions({
-    enableBasicAutocompletion: true,
-    enableSnippets: true,
-    enableLiveAutocompletion: true
-  });
+  editorVertex.setOptions(editorSetting);
+  editorFragment.setOptions(editorSetting);
+  
+  editorVertex.session.setValue(vertexShaderValue, 1);
+  editorFragment.session.setValue(fragmentShaderValue, 1);
 
 
   const image = loadImage('./assets/wood.jpg', main);
@@ -41,6 +85,13 @@ window.onload = function () {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    DOMVertexDiv.addEventListener('keyup', function () {
+      console.log(DOMLiveEdit.checked)
+      DOMLiveEdit.checked && compile();
+    })
+    DOMFragmentDiv.addEventListener('keyup', function () {
+      DOMLiveEdit.checked && compile();
+    })
     DOMRun.addEventListener('click', compile);
 
     let program = null;

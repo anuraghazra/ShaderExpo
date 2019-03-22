@@ -8,12 +8,15 @@ experiment with basic webgl shaders.
 ## :file_folder: Features
 - Rich CodeEditor
 - AutoCompletion
-- Run code on the fly
+- Live Editing
+- Basic Debugging
 
 
 ### :game_die: Third Party Libs
 - Ace
 
+
+-----------------
 
 Contributions are welcome.
 
