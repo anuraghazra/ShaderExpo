@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Shader Expo</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ext-language_tools.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/mode-glsl.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/snippets/glsl.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+    }
+
+
+    .left {
+      flex: 1;
+      display: flex;
+      position: relative;
+    }
+
+    .error {
+      display: none;
+      position: absolute;
+      padding: 10px;
+      width: 50%;
+      left: 0;
+      top: 0;
+      color: white;
+      overflow: auto;
+      font-size: 14px;
+      font-family: 'consolas';
+    }
+
+    .show {
+      display: block;
+    }
+
+
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor {
+      height: 50%;
+    }
+
+    canvas {
+      outline: 1px solid black;
+    }
+
+    #run-shader {
+      cursor: pointer;
+      position: absolute;
+      left: 95%;
+      top: 90%;
+      width: 50px;
+      height: 50px;
+      background-color: white;
+      border: 2px solid white;
+      outline: none;
+      border-radius: 50%;
+      font-size: 12px;
+      transition: 0.2s;
+      opacity: 0.5;
+      color: #252525;
+      transform: scale(1);
+      z-index: 1000;
+    }
+
+    .fa-play {
+      margin-left: 5px;
+    }
+
+    #run-shader:hover {
+      transform: scale(1.1);
+      opacity: 1;
+      transition: 0.2s;
+    }
+
+    #vertex-shader-code {
+      border-bottom: 5px solid white;
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <button id="run-shader"><i class="fa fa-2x fa-play"></i></button>
+
+  <div class="wrapper">
+    <div id="left">
+      <canvas id="c"></canvas>
+      <div class="error" id="error-msg">ERROR</div>
+    </div>
+
+    <div class="right">
+      <div class="editor" id="vertex-shader-code">// Vertex Shader
+attribute vec2 aVertexPos;
+attribute vec2 aTexCoord;
+
+uniform float mousex;
+uniform float mousey;
+uniform float uTime;
+
+varying vec2 vTexCoord;
+
+void main(void) {
+  vTexCoord = aTexCoord;
+  gl_Position = vec4(aVertexPos + vec2(mousex, mousey), 0.0, 1.0);
+}
+      </div>
+      <div class="editor" id="fragment-shader-code">// Fragment Shader
+precision highp float;
+
+varying vec2 vTexCoord;
+
+uniform float uTime;
+uniform float mousex;
+uniform float mousey;
+
+uniform sampler2D uSampler;
+
+void main(void) {
+  vec2 p = -1.0 + vTexCoord * 2.0;
+  float px = p.x + sin(mousex);
+  float py = p.y + cos(uTime);
+  float r = 1.0 - sqrt(px * px + py * py);
+  float lightStrength = clamp(1.0 + sin(uTime) + 0.5, 1.0, 5.0) * 2.0;
+  vec4 texel = texture2D(uSampler, vTexCoord);
+
+  gl_FragColor = vec4(texel.rgb * r * lightStrength, 1.0);
+}
+      </div>
+    </div>
+  </div>
+
+  <script src="./utils.js"></script>
+  <script src="./index.js"></script>
+</body>
+
+</html>
