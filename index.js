@@ -61,6 +61,7 @@ void main() {
   const DOMRotX = id('rot-x');
   const DOMRotY = id('rot-y');
   const DOMFile = id('file-load');
+  const DOMSelect = id('select-box');
   const DOMRun = id('run-shader');
   const DOMError = id('error-msg');
   const DOMVertexDiv = id('vertex-shader-code');
@@ -179,6 +180,9 @@ void main() {
       // init and set matrices
       mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
       mat4.perspective(projMatrix, fieldOfView, aspect, zNear, zFar);
+
+      console.log(gl.canvas.width, program);
+      gl.uniform2fv(program.uniforms.resolution, [gl.canvas.width, gl.canvas.height]);
     }
 
     function setMatrices() {
@@ -187,12 +191,30 @@ void main() {
       gl.uniformMatrix4fv(program.uniforms.uProjMatrix, false, projMatrix);
     }
 
-
+    // Load Examples
+    DOMSelect.addEventListener('input', function (e) {
+      let value = e.target.value;
+      fetch('./shaders/' + value + '/index.vs.glsl')
+        .then(res => res.text())
+        .then(data => {
+          editorVertex.session.setValue(data, 1);
+          fetch('./shaders/' + value + '/index.fs.glsl')
+            .then(res => res.text())
+            .then(data => {
+              editorFragment.session.setValue(data, 1);
+              compile();
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    });
+    
     window.addEventListener('mousemove', function (e) {
       gl.uniform2fv(program.uniforms.mouse, [e.offsetX, e.offsetY]);
     })
     // -- draw
     compile();
+
     animate();
     function animate() {
       gl.clearColor(0, 0, 0, 1.0);

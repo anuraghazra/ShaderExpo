@@ -11,16 +11,19 @@ experiment with basic webgl shaders.
 - Live Editing
 - Basic Debugging
 
+  vec3 pos = aVertexPos;
+  pos.x += cos(uTime * 1.0 + pos.x);
+  pos.y += sin(uTime * 1.0 + pos.y);
+
 
 ### :game_die: Third Party Libs
 - Ace
-
 
 -----------------
 
 ### :memo: TODO
 - [x] Add 3D Models
-- [ ] More Shader Variables
+- [x] More Shader Variables
 - [ ] Saving Shaders
 - [ ] OOP
  
@@ -30,6 +33,6 @@ Contributions are welcome.
 
 ## :octocat: Author
 - hazru.anurag@gmail.com
-- anuraghazra.github.io
+- https://anuraghazra.github.io
 
 Made with :heart: and JavaScript
