@@ -12,40 +12,44 @@ window.onload = function () {
   const gl = glcanvas.getContext('webgl');
 
   const vertexShaderValue = `// Vertex Shader
-attribute vec2 aVertexPos;
+precision mediump float;
+attribute vec3 aVertexPos;
+attribute vec3 aNormal;
 attribute vec2 aTexCoord;
 
-uniform float mousex;
-uniform float mousey;
+uniform mat4 uWorldMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uProjMatrix;
 uniform float uTime;
 
+varying vec3 vNorm; 
 varying vec2 vTexCoord;
 
-void main(void) {
+void main() {
+  gl_Position = uProjMatrix * uViewMatrix * uWorldMatrix * vec4(aVertexPos, 1.0);
+  
+  vNorm = (uWorldMatrix * vec4(aNormal, 0.0)).xyz;
   vTexCoord = aTexCoord;
-  gl_Position = vec4(aVertexPos + vec2(mousex, mousey), 0.0, 1.0);
 }
-  `
+`
   const fragmentShaderValue = `// Fragment Shader
-precision highp float;
+precision mediump float;
 
 varying vec2 vTexCoord;
+varying vec3 vNorm; 
 
 uniform float uTime;
-uniform float mousex;
-uniform float mousey;
+uniform sampler2D texture;
 
-uniform sampler2D uSampler;
+void main() {
+  vec4 texel = texture2D(texture, vTexCoord);
+  
+  vec3 ambientIntensity = vec3(0.5);
+  vec3 sunIntensity = vec3(1.0, 1.0, 1.0);
+  vec3 sunDirection = normalize(vec3(-1.0, 2.0, -1.1));
+  vec3 lightIntensity = ambientIntensity + sunIntensity * max(dot(vNorm, sunDirection), 0.0);
 
-void main(void) {
-  vec2 p = -1.0 + vTexCoord * 2.0;
-  float px = p.x + sin(mousex);
-  float py = p.y + cos(uTime);
-  float r = 1.0 - sqrt(px * px + py * py);
-  float lightStrength = clamp(1.0 + sin(uTime) + 0.5, 1.0, 5.0) * 2.0;
-  vec4 texel = texture2D(uSampler, vTexCoord);
-
-  gl_FragColor = vec4(texel.rgb * r * lightStrength, 1.0);
+  gl_FragColor = vec4(texel.rgb * lightIntensity, texel.a);
 }
 `;
 
@@ -57,7 +61,6 @@ void main(void) {
   const DOMVertexDiv = id('vertex-shader-code');
   const DOMFragmentDiv = id('fragment-shader-code');
   const DOMLiveEdit = id('live-edit');
-
   DOMPreloader.classList.add('hide');
   let editorSetting = {
     enableBasicAutocompletion: true,
@@ -72,18 +75,20 @@ void main(void) {
   var editorFragment = ace.edit("fragment-shader-code");
   editorVertex.setOptions(editorSetting);
   editorFragment.setOptions(editorSetting);
-
   editorVertex.session.setValue(vertexShaderValue, 1);
   editorFragment.session.setValue(fragmentShaderValue, 1);
 
 
   const image = loadImage('./assets/wood.jpg', main);
+  // Main function which runs once
   function main() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     DOMVertexDiv.addEventListener('keyup', function () {
-      console.log(DOMLiveEdit.checked)
       DOMLiveEdit.checked && compile();
     })
     DOMFragmentDiv.addEventListener('keyup', function () {
@@ -91,99 +96,86 @@ void main(void) {
     })
     DOMRun.addEventListener('click', compile);
 
+
+    // init
+    const fieldOfView = glMatrix.toRadian(45);   // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 1000.0;
     let program = null;
-    // init buffers
-    const vertices = new Float32Array([
-      -1.0, 1.0,
-      1.0, 1.0,
-      -1.0, -1.0,
-      1.0, -1.0,
-    ]);
 
-    const textureCoord = new Float32Array([
-      0.0, 0.0,
-      1.0, 0.0,
-      0.0, 1.0,
-      1.0, 1.0
-    ]);
-    let VBO = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    VBO.itemSize = 2;
-    VBO.numItems = 4;
+    let worldMatrix = mat4.create();
+    let viewMatrix = mat4.create();
+    let projMatrix = mat4.create();
 
-    let TBO = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, TBO);
-    gl.bufferData(gl.ARRAY_BUFFER, textureCoord, gl.STATIC_DRAW);
-    TBO.itemSize = 2;
-    TBO.numItems = 4;
-
-    // Init Textures
-    const texture = gl.createTexture();
+    let texture = gl.createTexture();
     renderTexture(gl, texture, image);
 
+    let cube = new Cube(gl);
+    cube.initBuffers();
+    // shader
+    let vShader = null;
+    let fShader = null;
+    let vertexShader = null;
+    let fragmentShader = null;
+
     function compile() {
-      const vShader = editorVertex.getValue();
-      const fShader = editorFragment.getValue();
+      // get shader code
+      vShader = editorVertex.getValue();
+      fShader = editorFragment.getValue();
+      // create, compile, check shaders
+      vertexShader = createShader(gl, gl.VERTEX_SHADER, vShader);
+      fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fShader);
+      showErrors(vertexShader, fragmentShader, DOMError);
 
-      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShader);
-      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fShader);
-
-      if (vertexShader.error || fragmentShader.error) {
-        DOMError.classList.add('show');
-
-        let verr = vertexShader.error || '';
-        let ferr = fragmentShader.error || '';
-        let error = verr + ferr;
-        DOMError.innerText = error;
-      } else {
-        DOMError.classList.remove('show');
-      }
-
+      // create program and set get shader variables
       program = createProgram(gl, vertexShader, fragmentShader);
-
-      program.attribs = {
-        aVertexPos: gl.getAttribLocation(program, 'aVertexPos'),
-        aTexCoord: gl.getAttribLocation(program, 'aTexCoord')
-      }
-      program.uniforms = {
-        uTime: gl.getUniformLocation(program, 'uTime'),
-        mousex: gl.getUniformLocation(program, 'mousex'),
-        mousey: gl.getUniformLocation(program, 'mousey'),
-      }
+      getShaderVariables(gl, vShader, program);
+      getShaderVariables(gl, fShader, program);
       gl.useProgram(program);
 
       // bind buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-      gl.vertexAttribPointer(program.attribs.aVertexPos, VBO.itemSize, gl.FLOAT, false, 0, 0);
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, TBO);
-      gl.vertexAttribPointer(program.attribs.aTexCoord, TBO.itemSize, gl.FLOAT, false, 0, 0);
-
-      // enable buffer
+      cube.enableAttribs(program.attribs.aVertexPos, program.attribs.aNormal, program.attribs.aTexCoord);
       gl.enableVertexAttribArray(program.attribs.aVertexPos);
       gl.enableVertexAttribArray(program.attribs.aTexCoord);
+      gl.enableVertexAttribArray(program.attribs.aNormal);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.buffers.indices);
 
-      animate();
+      worldMatrix = mat4.create();
+      viewMatrix = mat4.create();
+      projMatrix = mat4.create();
+
+      initMatrices();
+      setMatrices();
     }
 
-    compile();
-    glcanvas.addEventListener('mousemove', (e) => {
-      gl.uniform1f(program.uniforms.mousex, -1.0 + e.offsetX / width * 2.0);
-      gl.uniform1f(program.uniforms.mousey, -1.0 + -(e.offsetY - height) / height * 2.0);
-    })
+    function initMatrices() {
+      mat4.identity(worldMatrix);
+      mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
+      mat4.perspective(projMatrix, fieldOfView, aspect, zNear, zFar);
+    }
+    function setMatrices() {
+      gl.uniformMatrix4fv(program.uniforms.uWorldMatrix, false, worldMatrix);
+      gl.uniformMatrix4fv(program.uniforms.uViewMatrix, false, viewMatrix);
+      gl.uniformMatrix4fv(program.uniforms.uProjMatrix, false, projMatrix);
+    }
 
+    //  ---- DRAW
+    compile()
 
+    animate();
     function animate() {
       gl.clearColor(0, 0, 0, 1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       gl.uniform1f(program.uniforms.uTime, (Date.now() / 1000.0) - t0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, VBO.numItems);
 
+      mat4.rotate(worldMatrix, worldMatrix, 0.01, [0, 1, 1]);
+      setMatrices();
+
+      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
       requestAnimationFrame(animate);
     }
-    animate();
 
   }
 

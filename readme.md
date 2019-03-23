@@ -19,7 +19,7 @@ experiment with basic webgl shaders.
 -----------------
 
 ### :memo: TODO
-- [ ] Add 3D Models
+- [x] Add 3D Models
 - [ ] More Shader Variables
 - [ ] Saving Shaders
 - [ ] OOP
