@@ -8,7 +8,7 @@ function getShaderVariables(gl, shader, program) {
   function getType(match) {
     return match.split(' ')[1].replace(';', '');
   }
-  
+
   // * > Find Variables
 
   // regEx Taken From claygl.js
@@ -74,7 +74,7 @@ function getShaderError(_gl, shader, shaderString) {
     let errorline = +_gl.getShaderInfoLog(shader).match(/ERROR:\s\d+:(\d+):/)[1];
     let codeline = errorline + ' : ' + shaderString.split('\n')[errorline - 1].trim();
 
-    return [_gl.getShaderInfoLog(shader), '------',  '> ' + codeline, '------'].join('\n');
+    return [_gl.getShaderInfoLog(shader), '------', '> ' + codeline, '------'].join('\n');
   }
 }
 
@@ -85,8 +85,8 @@ function createShader(_gl, type, source) {
   // Check For Shader Errors
   let error = getShaderError(_gl, shader, source);
   let name = (type == _gl.VERTEX_SHADER) ? 'VERTEX_SHADER ' : 'FRAGMENT_SHADER ';
-  
-  if (error) { console.log(error); return { error: '\n' +  name + '\n' + error } }
+
+  if (error) { console.log(error); return { error: '\n' + name + '\n' + error } }
 
   return shader;
 }
@@ -121,7 +121,7 @@ function setVertexAttribPointer(_gl, pos, items, norm, stride, offset) {
   norm = norm || false;
   stride = stride || 0;
   offset = offset || 0;
-  _gl.vertexAttribPointer(pos, items, _gl.FLOAT, norm,  stride, offset);
+  _gl.vertexAttribPointer(pos, items, _gl.FLOAT, norm, stride, offset);
 
 }
 
