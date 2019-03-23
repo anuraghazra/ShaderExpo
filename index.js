@@ -181,7 +181,6 @@ void main() {
       mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
       mat4.perspective(projMatrix, fieldOfView, aspect, zNear, zFar);
 
-      console.log(gl.canvas.width, program);
       gl.uniform2fv(program.uniforms.resolution, [gl.canvas.width, gl.canvas.height]);
     }
 
@@ -193,22 +192,35 @@ void main() {
 
     // Load Examples
     DOMSelect.addEventListener('input', function (e) {
+      DOMVertexDiv.classList.add('shader-loading');
+      DOMFragmentDiv.classList.add('shader-loading');
+      let loader = document.createElement('div');
+      loader.className = 'loader loader-shader';
+      let loader2 = loader.cloneNode();
+      DOMVertexDiv.appendChild(loader);
+      DOMFragmentDiv.appendChild(loader2);
+
       let value = e.target.value;
-      fetch('./shaders/' + value + '/index.vs.glsl')
+      let path = './shaders/' + value;
+      fetch(path + '/index.vs.glsl')
         .then(res => res.text())
         .then(data => {
           editorVertex.session.setValue(data, 1);
-          fetch('./shaders/' + value + '/index.fs.glsl')
+          fetch(path + '/index.fs.glsl')
             .then(res => res.text())
             .then(data => {
               editorFragment.session.setValue(data, 1);
+              DOMVertexDiv.removeChild(loader);
+              DOMFragmentDiv.removeChild(loader2);
+              DOMVertexDiv.classList.remove('shader-loading');
+              DOMFragmentDiv.classList.remove('shader-loading');
               compile();
             })
             .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     });
-    
+
     window.addEventListener('mousemove', function (e) {
       gl.uniform2fv(program.uniforms.mouse, [e.offsetX, e.offsetY]);
     })

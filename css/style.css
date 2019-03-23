@@ -46,6 +46,25 @@ body {
   }
 }
 
+.shader-loading::after {
+  content: ' ';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(117, 67, 254, 0.384);
+}
+
+.loader-shader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+}
+
 .hide {
   display: none;
 }
@@ -280,6 +299,7 @@ input::-moz-focus-outer {
 }
 
 /* SELECT BOX */
+
 .select-box {
   margin-top: 10px;
   width: 100%;

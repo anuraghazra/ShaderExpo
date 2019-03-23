@@ -4,7 +4,6 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float uTime;
 uniform vec2 mouse;
-uniform sampler2D backbuffer;
 
 const int num_x = 5;
 const int num_y = 5;
@@ -34,7 +33,6 @@ void main() {
 		}
 	}
 	vec2 texPos = vec2(gl_FragCoord.xy/resolution);
-	vec4 shadow = texture2D(backbuffer, texPos)*0.7;
-	gl_FragColor = color + shadow;
+	gl_FragColor = color;
 	gl_FragColor = vec4(gl_FragColor.xyz,1.0);
 }
