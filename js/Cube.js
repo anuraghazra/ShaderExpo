@@ -1,134 +1,102 @@
 class Cube {
   constructor(gl) {
     this.gl = gl;
-    // init buffers
-    this.positions = new Float32Array([
-      // Front face
-      -1.0, -1.0, 1.0,
-      1.0, -1.0, 1.0,
-      1.0, 1.0, 1.0,
-      -1.0, 1.0, 1.0,
 
-      // Back face
-      -1.0, -1.0, -1.0,
-      -1.0, 1.0, -1.0,
-      1.0, 1.0, -1.0,
-      1.0, -1.0, -1.0,
-
-      // Top face
-      -1.0, 1.0, -1.0,
-      -1.0, 1.0, 1.0,
-      1.0, 1.0, 1.0,
-      1.0, 1.0, -1.0,
-
-      // Bottom face
-      -1.0, -1.0, -1.0,
-      1.0, -1.0, -1.0,
-      1.0, -1.0, 1.0,
-      -1.0, -1.0, 1.0,
-
-      // Right face
-      1.0, -1.0, -1.0,
-      1.0, 1.0, -1.0,
-      1.0, 1.0, 1.0,
-      1.0, -1.0, 1.0,
-
-      // Left face
-      -1.0, -1.0, -1.0,
-      -1.0, -1.0, 1.0,
-      -1.0, 1.0, 1.0,
-      -1.0, 1.0, -1.0,
-    ]);
-    this.normals = [
-      // Front
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-
-      // Back
-      0.0, 0.0, -1.0,
-      0.0, 0.0, -1.0,
-      0.0, 0.0, -1.0,
-      0.0, 0.0, -1.0,
-
-      // Top
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-
-      // Bottom
-      0.0, -1.0, 0.0,
-      0.0, -1.0, 0.0,
-      0.0, -1.0, 0.0,
-      0.0, -1.0, 0.0,
-
-      // Right
-      1.0, 0.0, 0.0,
-      1.0, 0.0, 0.0,
-      1.0, 0.0, 0.0,
-      1.0, 0.0, 0.0,
-
-      // Left
-      -1.0, 0.0, 0.0,
-      -1.0, 0.0, 0.0,
-      -1.0, 0.0, 0.0,
-      -1.0, 0.0, 0.0
-    ];
-    this.indices = [
-      0, 1, 2, 0, 2, 3,    // front
-      4, 5, 6, 4, 6, 7,    // back
-      8, 9, 10, 8, 10, 11,   // top
-      12, 13, 14, 12, 14, 15,   // bottom
-      16, 17, 18, 16, 18, 19,   // right
-      20, 21, 22, 20, 22, 23,   // left
-    ];
-    this.textureCoords = [
-      // Front
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      // Back
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      // Top
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      // Bottom
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      // Right
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      // Left
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-    ]
-
+    let { positions, normals, indices, texCoords } = this.createGeometry({});
+    this.positions = positions;
+    this.normals = normals;
+    this.indices = indices;
+    this.texCoords = texCoords;
     this.buffers = {};
   }
 
+  createGeometry(options) {
+    let width = options.width || 1;
+    let height = options.height || 1;
+    let depth = options.depth || 1;
+
+    let CUBE_FACE_INDICES_ = [
+      [3, 7, 5, 1], // right
+      [6, 2, 0, 4], // left
+      [6, 7, 3, 2], // top?
+      [0, 1, 5, 4], // bottom?
+      [7, 6, 4, 5], // front
+      [2, 3, 1, 0]  // back
+    ];
+
+    let cornerVertices = [
+      [-width, -height, -depth],
+      [+width, -height, -depth],
+      [-width, +height, -depth],
+      [+width, +height, -depth],
+      [-width, -height, +depth],
+      [+width, -height, +depth],
+      [-width, +height, +depth],
+      [+width, +height, +depth]
+    ];
+
+    let faceNormals = [
+      [+1, +0, +0],
+      [-1, +0, +0],
+      [+0, +1, +0],
+      [+0, -1, +0],
+      [+0, +0, +1],
+      [+0, +0, -1]
+    ];
+
+    let uvCoords = [
+      [1, 0],
+      [0, 0],
+      [0, 1],
+      [1, 1]
+    ];
+
+    // let numVertices = 6 * 4;
+    let positions = [];
+    let normals = [];
+    let texCoords = [];
+    let indices = [];
+
+    for (let f = 0; f < 6; ++f) {
+      let faceIndices = CUBE_FACE_INDICES_[f];
+      for (let v = 0; v < 4; ++v) {
+        let position = cornerVertices[faceIndices[v]];
+        let normal = faceNormals[f];
+        let uv = uvCoords[v];
+        // Each face needs all four vertices because the normals and texture
+        // coordinates are not all the same.
+        positions.push(position);
+        normals.push(normal);
+        texCoords.push(uv);
+
+      }
+      // Two triangles make a square face.
+      let offset = 4 * f;
+      indices.push([offset + 0, offset + 1, offset + 2]);
+      indices.push([offset + 0, offset + 2, offset + 3]);
+    }
+    positions = [].concat.apply([], positions);
+    normals = [].concat.apply([], normals);
+    texCoords = [].concat.apply([], texCoords);
+    indices = [].concat.apply([], indices);
+
+    positions = new Float32Array(positions);
+    normals = new Float32Array(normals);
+    texCoords = new Float32Array(texCoords);
+    indices = new Uint16Array(indices);
+
+    return { positions, normals, texCoords, indices };
+
+  }
 
   initBuffers() {
-    this.buffers.position = createBuffer(this.gl, this.gl.ARRAY_BUFFER, new Float32Array(this.positions));
-    this.buffers.normal = createBuffer(this.gl, this.gl.ARRAY_BUFFER, new Float32Array(this.normals));
-    this.buffers.texture = createBuffer(this.gl, this.gl.ARRAY_BUFFER, new Float32Array(this.textureCoords));
+    this.buffers.position = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.positions);
+    this.buffers.normal = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.normals);
+    this.buffers.texture = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.texCoords);
     this.buffers.position.numItems = 3;
     this.buffers.normal.numItems = 3;
     this.buffers.texture.numItems = 2;
-    this.buffers.indices = createBuffer(this.gl, this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices));
+    this.buffers.indices = createBuffer(this.gl, this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
   }
 
   enableAttribs(postionAttribLoc, normalAttribLoc, textureAttribLoc) {

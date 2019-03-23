@@ -56,6 +56,9 @@ void main() {
 
   // CODE EDITOR
   const DOMPreloader = id('preloader');
+  const DOMRotX = id('rot-x');
+  const DOMRotY = id('rot-y');
+  const DOMFile = id('file-load');
   const DOMRun = id('run-shader');
   const DOMError = id('error-msg');
   const DOMVertexDiv = id('vertex-shader-code');
@@ -79,14 +82,9 @@ void main() {
   editorFragment.session.setValue(fragmentShaderValue, 1);
 
 
-  const image = loadImage('./assets/wood.jpg', main);
+  let image = loadImage('./assets/wood.jpg', main);
   // Main function which runs once
   function main() {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     DOMVertexDiv.addEventListener('keyup', function () {
       DOMLiveEdit.checked && compile();
@@ -95,34 +93,65 @@ void main() {
       DOMLiveEdit.checked && compile();
     })
     DOMRun.addEventListener('click', compile);
+    DOMFile.addEventListener('change', function (evt) {
+      let tgt = evt.target || window.event.srcElement;
+      let files = tgt.files;
+
+      if (!("FileReader" in window)) {
+        alert('file loader API is not supported, you will not be able to load textures');
+      }
+      // FileReader support
+      if (FileReader && files && files.length) {
+        let fr = new FileReader();
+        fr.onload = function () {
+          image = loadImage(fr.result, function () {
+            renderTexture(gl, texture, image);
+          });
+        }
+        fr.readAsDataURL(files[0]);
+      }
+    });
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
     // init
-    const fieldOfView = glMatrix.toRadian(45);   // in radians
+    const fieldOfView = glMatrix.toRadian(45); // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 1000.0;
     let program = null;
-
+    // init matrices
     let worldMatrix = mat4.create();
     let viewMatrix = mat4.create();
     let projMatrix = mat4.create();
-
+    // init texture
     let texture = gl.createTexture();
-    renderTexture(gl, texture, image);
 
+    renderTexture(gl, texture, image);
+    // init cube
     let cube = new Cube(gl);
     cube.initBuffers();
-    // shader
+    // init shader
     let vShader = null;
     let fShader = null;
     let vertexShader = null;
     let fragmentShader = null;
 
+
+    /**
+     * @method compile 
+     * recompiles the code everytime when any change has happen in shaders
+     */
     function compile() {
       // get shader code
       vShader = editorVertex.getValue();
       fShader = editorFragment.getValue();
+
       // create, compile, check shaders
       vertexShader = createShader(gl, gl.VERTEX_SHADER, vShader);
       fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fShader);
@@ -141,28 +170,23 @@ void main() {
       gl.enableVertexAttribArray(program.attribs.aNormal);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.buffers.indices);
 
-      worldMatrix = mat4.create();
-      viewMatrix = mat4.create();
-      projMatrix = mat4.create();
+      // worldMatrix = mat4.create();
+      // viewMatrix = mat4.create();
+      // projMatrix = mat4.create();
 
-      initMatrices();
-      setMatrices();
-    }
-
-    function initMatrices() {
-      mat4.identity(worldMatrix);
+      // init and set matrices
       mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
       mat4.perspective(projMatrix, fieldOfView, aspect, zNear, zFar);
     }
+
     function setMatrices() {
       gl.uniformMatrix4fv(program.uniforms.uWorldMatrix, false, worldMatrix);
       gl.uniformMatrix4fv(program.uniforms.uViewMatrix, false, viewMatrix);
       gl.uniformMatrix4fv(program.uniforms.uProjMatrix, false, projMatrix);
     }
 
-    //  ---- DRAW
-    compile()
-
+    // -- draw
+    compile();
     animate();
     function animate() {
       gl.clearColor(0, 0, 0, 1.0);
@@ -170,7 +194,9 @@ void main() {
 
       gl.uniform1f(program.uniforms.uTime, (Date.now() / 1000.0) - t0);
 
-      mat4.rotate(worldMatrix, worldMatrix, 0.01, [0, 1, 1]);
+      mat4.rotate(worldMatrix, worldMatrix, DOMRotX.value, [0, 1, 0]);
+      mat4.rotate(worldMatrix, worldMatrix, DOMRotY.value, [1, 0, 0]);
+
       setMatrices();
 
       gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
