@@ -11,10 +11,6 @@ experiment with basic webgl shaders.
 - Live Editing
 - Basic Debugging
 
-  vec3 pos = aVertexPos;
-  pos.x += cos(uTime * 1.0 + pos.x);
-  pos.y += sin(uTime * 1.0 + pos.y);
-
 
 ### :game_die: Third Party Libs
 - Ace
