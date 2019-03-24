@@ -136,9 +136,11 @@ void main() {
     let texture = gl.createTexture();
 
     renderTexture(gl, texture, image);
-    // init cube
-    let cube = new Cube(gl);
-    cube.initBuffers();
+
+    // init mesh
+    let mesh = new Mesh(gl);
+    mesh.initBuffers();
+
     // init shader
     let vShader = null;
     let fShader = null;
@@ -162,20 +164,14 @@ void main() {
 
       // create program and set get shader variables
       program = createProgram(gl, vertexShader, fragmentShader);
-      getShaderVariables(gl, vShader, program);
-      getShaderVariables(gl, fShader, program);
+      getShaderVariables(gl, program);
+      
       gl.useProgram(program);
 
       // bind buffer
-      cube.enableAttribs(program.attribs.aVertexPos, program.attribs.aNormal, program.attribs.aTexCoord);
-      gl.enableVertexAttribArray(program.attribs.aVertexPos);
-      gl.enableVertexAttribArray(program.attribs.aTexCoord);
-      gl.enableVertexAttribArray(program.attribs.aNormal);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.buffers.indices);
+      mesh.enableAttribs(program.attribs.aVertexPos, program.attribs.aNormal, program.attribs.aTexCoord);
 
-      // worldMatrix = mat4.create();
-      // viewMatrix = mat4.create();
-      // projMatrix = mat4.create();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.buffers.indices);
 
       // init and set matrices
       mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
@@ -239,7 +235,7 @@ void main() {
 
       setMatrices();
 
-      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+      gl.drawElements(gl.TRIANGLES, mesh.verticesCount, gl.UNSIGNED_SHORT, 0);
       requestAnimationFrame(animate);
     }
 
