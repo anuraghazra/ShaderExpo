@@ -2,7 +2,7 @@
  * OLD Way might be usefull in some cases but i dont know
  * 
  */
-// function getShaderVariables(gl, shader, program) {
+// function __getShaderVariables(gl, shader, program) {
 //   if (!program.attribs) program.attribs = {};
 //   if (!program.uniforms) program.uniforms = {};
 
@@ -73,23 +73,23 @@
  * @param {WebGLRenderingContext} gl 
  * @param {WebGLProgram} program 
  */
-function getShaderVariables(gl, program) {
-  program.attribs = {};
-  program.uniforms = {};
-  // get shader variables location;
-  const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-  for (let i = 0; i < numUniforms; ++i) {
-    const info = gl.getActiveUniform(program, i);
-    program.uniforms[info.name] = gl.getUniformLocation(program, info.name);
-  }
-  const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-  for (let i = 0; i < numAttribs; ++i) {
-    const info = gl.getActiveAttrib(program, i);
-    program.attribs[info.name] = gl.getAttribLocation(program, info.name);
-  }
+// function getShaderVariables(gl, program) {
+//   program.attribs = {};
+//   program.uniforms = {};
+//   // get shader variables location;
+//   const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+//   for (let i = 0; i < numUniforms; ++i) {
+//     const info = gl.getActiveUniform(program, i);
+//     program.uniforms[info.name] = gl.getUniformLocation(program, info.name);
+//   }
+//   const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+//   for (let i = 0; i < numAttribs; ++i) {
+//     const info = gl.getActiveAttrib(program, i);
+//     program.attribs[info.name] = gl.getAttribLocation(program, info.name);
+//   }
 
-  return program;
-}
+//   return program;
+// }
 
 /**
  * @method getShaderError
@@ -97,14 +97,14 @@ function getShaderVariables(gl, program) {
  * @param {WebGLShader} shader 
  * @param {String} shaderString 
  */
-function getShaderError(_gl, shader, shaderString) {
-  if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
-    let errorline = +_gl.getShaderInfoLog(shader).match(/ERROR:\s\d+:(\d+):/)[1];
-    let codeline = errorline + ' : ' + shaderString.split('\n')[errorline - 1].trim();
+// function getShaderError(_gl, shader, shaderString) {
+//   if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
+//     let errorline = +_gl.getShaderInfoLog(shader).match(/ERROR:\s\d+:(\d+):/)[1];
+//     let codeline = errorline + ' : ' + shaderString.split('\n')[errorline - 1].trim();
 
-    return [_gl.getShaderInfoLog(shader), '------', '> ' + codeline, '------'].join('\n');
-  }
-}
+//     return [_gl.getShaderInfoLog(shader), '------', '> ' + codeline, '------'].join('\n');
+//   }
+// }
 
 /**
  * 
@@ -112,18 +112,18 @@ function getShaderError(_gl, shader, shaderString) {
  * @param {Number} type 
  * @param {String} source 
  */
-function createShader(_gl, type, source) {
-  const shader = _gl.createShader(type);
-  _gl.shaderSource(shader, source);
-  _gl.compileShader(shader);
-  // Check For Shader Errors
-  let error = getShaderError(_gl, shader, source);
-  let name = (type == _gl.VERTEX_SHADER) ? 'VERTEX_SHADER ' : 'FRAGMENT_SHADER ';
+// function createShader(_gl, type, source) {
+//   const shader = _gl.createShader(type);
+//   _gl.shaderSource(shader, source);
+//   _gl.compileShader(shader);
+//   // Check For Shader Errors
+//   let error = getShaderError(_gl, shader, source);
+//   let name = (type == _gl.VERTEX_SHADER) ? 'VERTEX_SHADER ' : 'FRAGMENT_SHADER ';
 
-  if (error) { console.log(error); return { error: '\n' + name + '\n' + error } }
+//   if (error) { console.warn(error); return { error: '\n' + name + '\n' + error } }
 
-  return shader;
-}
+//   return shader;
+// }
 
 /**
  * 
@@ -131,17 +131,17 @@ function createShader(_gl, type, source) {
  * @param {WebGLProgram} vshader 
  * @param {WebGLProgram} fshader 
  */
-function createProgram(_gl, vshader, fshader) {
-  const program = _gl.createProgram();
-  _gl.attachShader(program, vshader);
-  _gl.attachShader(program, fshader);
-  _gl.linkProgram(program);
-  if (!_gl.getProgramParameter(program, _gl.LINK_STATUS)) {
-    console.warn('Unable to initialize program ' + _gl.getProgramInfoLog(program));
-    return null;
-  }
-  return program;
-}
+// function createProgram(_gl, vshader, fshader) {
+//   const program = _gl.createProgram();
+//   _gl.attachShader(program, vshader);
+//   _gl.attachShader(program, fshader);
+//   _gl.linkProgram(program);
+//   if (!_gl.getProgramParameter(program, _gl.LINK_STATUS)) {
+//     console.warn('Unable to initialize program ' + _gl.getProgramInfoLog(program));
+//     return null;
+//   }
+//   return program;
+// }
 
 /**
  * 
