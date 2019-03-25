@@ -61,7 +61,9 @@ void main() {
   const DOMRotX = id('rot-x');
   const DOMRotY = id('rot-y');
   const DOMFile = id('file-load');
+  const DOMLoadModel = id('model-load');
   const DOMSelect = id('select-box');
+  const DOMModel = id('select-model');
   const DOMRun = id('run-shader');
   const DOMError = id('error-msg');
   const DOMVertexDiv = id('vertex-shader-code');
@@ -85,7 +87,7 @@ void main() {
   editorFragment.session.setValue(fragmentShaderValue, 1);
 
 
-  let image = loadImage('./assets/wood.jpg', main);
+  let image = loadImage('./assets/textures/wood.jpg', main);
   // Main function which runs once
   function main() {
     DOMVertexDiv.addEventListener('keyup', function () {
@@ -113,6 +115,8 @@ void main() {
         fr.readAsDataURL(files[0]);
       }
     });
+
+
     // Load Examples
     DOMSelect.addEventListener('input', function (e) {
       DOMVertexDiv.classList.add('shader-loading');
@@ -124,7 +128,7 @@ void main() {
       DOMFragmentDiv.appendChild(loader2);
 
       let value = e.target.value;
-      let path = './shaders/' + value;
+      let path = './assets/shaders/' + value;
       fetchShader(path, (vert, frag) => {
         editorVertex.session.setValue(vert, 1);
         editorFragment.session.setValue(frag, 1);
@@ -136,6 +140,8 @@ void main() {
       })
     });
 
+
+
     // GL CLEAR -----------
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -145,6 +151,7 @@ void main() {
 
 
     // INTIALIZE VARIABLES
+    let RAf;
     const fieldOfView = glMatrix.toRadian(45); // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
@@ -158,6 +165,27 @@ void main() {
     renderTexture(gl, texture, image);
     // init mesh
     let mesh = new Mesh(gl);
+    // let model = new RawModel();
+
+    DOMLoadModel.addEventListener('change', function (evt) {
+      let tgt = evt.target || window.event.srcElement;
+      let files = tgt.files;
+
+      if (!("FileReader" in window)) {
+        alert('file loader API is not supported, you will not be able to load model');
+      }
+      // FileReader support
+      if (FileReader && files && files.length) {
+        let fr = new FileReader();
+        fr.onload = function () {
+          mesh.loadRawModel(fr.result);
+          compile();
+          animate();
+        }
+        fr.readAsText(files[0]);
+      }
+    });
+    
     mesh.initBuffers();
     // init shader
     let shader = new Shader(gl);
@@ -200,11 +228,30 @@ void main() {
       gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, projMatrix);
     }
 
-
-
     window.addEventListener('mousemove', function (e) {
       gl.uniform2fv(shader.uniforms.mouse, [e.offsetX, e.offsetY]);
     });
+
+
+    DOMModel.addEventListener('input', function (e) {
+      cancelAnimationFrame(RAf);
+      switch (e.target.value) {
+        case 'CUBE':
+          mesh = new Mesh(gl);
+          mesh.initBuffers();
+          break;
+        case 'SPHERE':
+          mesh = new Sphere(gl);
+          mesh.initBuffers();
+          break;
+        case 'TORUS':
+          mesh = new Torus(gl);
+          mesh.initBuffers();
+          break;
+      }
+      compile();
+      animate();
+    })
 
     // -- draw
     compile();
@@ -219,9 +266,8 @@ void main() {
       mat4.rotate(worldMatrix, worldMatrix, DOMRotY.value, [1, 0, 0]);
 
       setMatrices();
-
-      gl.drawElements(gl.TRIANGLES, mesh.verticesCount, gl.UNSIGNED_SHORT, 0);
-      requestAnimationFrame(animate);
+      gl.drawElements(gl.TRIANGLES, mesh.indicesCount, gl.UNSIGNED_SHORT, 0);
+      RAf = requestAnimationFrame(animate);
     }
 
   }

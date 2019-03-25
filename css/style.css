@@ -69,18 +69,6 @@ body {
   display: none;
 }
 
-.wrapper {
-  position: relative;
-  width: 100%;
-  display: flex;
-}
-
-.left {
-  flex: 1;
-  display: flex;
-  position: relative;
-}
-
 .error {
   display: none;
   position: absolute;
@@ -93,6 +81,18 @@ body {
   font-size: 14px;
   background-color: rgba(0, 0, 0, 0.8);
   font-family: 'consolas';
+}
+
+.wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  position: relative;
 }
 
 .show {
@@ -177,9 +177,9 @@ canvas {
   top: 0;
   background-color: white;
   border-radius: 0px 0px 10px 0px;
-  font-size: 12px;
   opacity: 0.2;
   transition: 0.2s;
+  font-size: 0.7rem;
 }
 
 .ui-settings:hover {
@@ -190,7 +190,7 @@ canvas {
 /* -----RANGE SLIDER */
 
 .range-slider {
-  margin: 0px 0 0 0%;
+  margin: 0;
 }
 
 .range-slider {
@@ -262,7 +262,7 @@ input::-moz-focus-outer {
 /* ------ FILE  */
 
 .file-input {
-  margin-top: 20px;
+  margin-top: 10px;
   color: transparent;
 }
 
@@ -270,11 +270,16 @@ input::-moz-focus-outer {
   visibility: hidden;
 }
 
+.file-input.model-load::before {
+  content: 'Load OBJ Model';
+}
+
 .file-input::before {
   content: 'Load Texture';
   color: #656565;
   display: inline-block;
   background: white;
+  font-size: 0.8em;
   border: 1px solid #383A3F;
   border-radius: 3px;
   padding: 5px 8px;
@@ -283,7 +288,6 @@ input::-moz-focus-outer {
   user-select: none;
   cursor: pointer;
   font-weight: 700;
-  font-size: 10pt;
 }
 
 .file-input:hover::before {
@@ -301,6 +305,7 @@ input::-moz-focus-outer {
 /* SELECT BOX */
 
 .select-box {
+  font-size: 0.8em;
   margin-top: 10px;
   width: 100%;
   padding: 5px;

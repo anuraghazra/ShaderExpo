@@ -11,14 +11,14 @@
 
   <link rel="stylesheet" href="./css/style.css">
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119972196-1"></script>
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119972196-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'UA-119972196-1');
-  </script>
+  </script> -->
 </head>
 
 <body>
@@ -33,7 +33,7 @@
     <i class="fa fa-2x fa-play"></i>
   </button>
 
-  <div class="wrapper">
+  <main class="wrapper">
     <div id="left">
       <section class="ui-settings">
         <label class="range-slider">
@@ -48,15 +48,28 @@
           <input class="file-input" type="file" id="file-load" />
         </label>
         <label class="range-slider">
+          <input class="file-input model-load" type="file" id="model-load" />
+        </label>
+        <label class="range-slider">
           <select class="select-box" type="file" id="select-box">
             <option value="default">Default</option>
             <option value="fire_grid">Fire Grid</option>
             <option value="circle_spiral">Circle Spiral</option>
             <option value="shader_ball">Shader Balls</option>
-          <select>
+            <option value="light_show">Light Show</option>
+            <select>
+        </label>
+        <label class="range-slider">
+          <select class="select-box" type="file" id="select-model">
+            <option value="CUBE">Cube</option>
+            <option value="SPHERE">Sphere</option>
+            <option value="TORUS">Torus</option>
+            <select>
         </label>
       </section>
-      <canvas id="c"></canvas>
+      <section class="canvas-wrapper">
+        <canvas id="c"></canvas>
+      </section>
       <div class="error" id="error-msg">ERROR</div>
     </div>
 
@@ -66,7 +79,7 @@
       <div class="editor" id="fragment-shader-code">
       </div>
     </div>
-  </div>
+  </main>
 
   <div id="preloader" class="preloader">
     <div>
@@ -80,10 +93,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ext-language_tools.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/mode-glsl.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/snippets/glsl.js"></script>
-  <script src="./utils.js"></script>
+
+  <script src="./js/utils.js"></script>
+  <script src="./js/RawModel.js"></script>
   <script src="./js/helpers.js"></script>
   <script src="./js/Shader.js"></script>
-  <script src="./js/Cube.js"></script>
+  <script src="./js/Mesh.js"></script>
   <script src="./index.js"></script>
 </body>
 

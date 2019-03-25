@@ -9,6 +9,19 @@ class Mesh {
     this.texCoords = texCoords;
     this.buffers = {};
 
+    this.rawModel = new RawModel();
+  }
+
+  loadRawModel(stringdata, callback) {
+    this.rawModel.parse(stringdata);
+    this.positions = this.rawModel.positions;
+    this.normals = this.rawModel.normals;
+    this.texCoords = this.rawModel.texCoords;
+    this.indices = this.rawModel.indices;
+    this.indicesCount = this.rawModel.indicesCount;
+
+    this.initBuffers();
+    callback && callback();
   }
 
   createGeometry(options) {
@@ -85,7 +98,7 @@ class Mesh {
     normals = new Float32Array(normals);
     texCoords = new Float32Array(texCoords);
     indices = new Uint16Array(indices);
-    this.verticesCount = indices.length;
+    this.indicesCount = indices.length;
 
     return { positions, normals, texCoords, indices };
 
@@ -99,6 +112,10 @@ class Mesh {
     this.buffers.normal.numItems = 3;
     this.buffers.texture.numItems = 2;
     this.buffers.indices = createBuffer(this.gl, this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
+  }
+
+  unbindBuffers() {
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null); // unbinding
   }
 
   enableAttribs(postionAttribLoc, normalAttribLoc, textureAttribLoc) {
@@ -124,6 +141,9 @@ class Mesh {
   }
 
 }
+
+
+
 
 class Torus extends Mesh {
   constructor(gl) {
@@ -201,7 +221,7 @@ class Torus extends Mesh {
     texCoords = new Float32Array(texCoords);
     indices = new Uint16Array(indices);
 
-    this.verticesCount = indices.length;
+    this.indicesCount = indices.length;
     return { positions, normals, texCoords, indices };
   }
 }
@@ -241,7 +261,7 @@ class Plane extends Mesh {
       1.0, -1.0, 1.0,
     ]);
 
-    this.verticesCount = indices.length;
+    this.indicesCount = indices.length;
     return { positions, normals, texCoords, indices };
   }
 }
@@ -352,7 +372,7 @@ class Sphere extends Mesh {
         l += 6;
       }
     }
-    this.verticesCount = indices.length;
+    this.indicesCount = indices.length;
 
     return { positions, normals, texCoords, indices };
   }
