@@ -3,7 +3,8 @@
 
 WebGL Shader Playground.
 
-experiment with basic webgl shaders.
+`ShaderExpo` is purely dependency free shader editor made in Raw WebGL API.
+Experiment with basic webgl shaders on the fly.
 
 ## :file_folder: Features
 - Rich CodeEditor
@@ -12,10 +13,24 @@ experiment with basic webgl shaders.
 - Basic Debugging
 
 
+-----------------
+
+## :necktie: Avialable Uniforms
+
+| **Name**      | **Type**   |
+| ------------- | ---------- |
+| uWorldMatrix  | mat4       |
+| uViewMatrix   | mat4       |
+| uProjMatrix   | mat4       |
+| uTime         | float      |
+| mouse         | vec2       |
+| resolution    | vec2       |
+| texture       | sampler2D  |
+
+
 ### :game_die: Third Party Libs
 - Ace
 
------------------
 
 ### :memo: TODO
 - [x] Add 3D Models
@@ -23,6 +38,9 @@ experiment with basic webgl shaders.
 - [ ] Saving Shaders
 - [ ] OOP
  
+
+-----------------
+
 Contributions are welcome.
 
 :star: Support the project by giving it a star :star:

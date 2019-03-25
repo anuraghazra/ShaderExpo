@@ -12,7 +12,6 @@ class RawModel {
 
   parse(data, cb) {
     let model = this._parse(data);
-    console.log(data)
     this.positions = new Float32Array(model.positions);
     this.normals = new Float32Array(model.normals);
     this.texCoords = new Float32Array(model.texCoords);
