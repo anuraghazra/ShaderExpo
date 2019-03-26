@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 
 uniform vec2 mouse;
 uniform float uTime;

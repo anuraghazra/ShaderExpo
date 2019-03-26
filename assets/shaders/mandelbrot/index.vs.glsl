@@ -1,5 +1,5 @@
 // Vertex Shader
-precision mediump float;
+precision highp float;
 attribute vec3 aVertexPos;
 
 void main() {
