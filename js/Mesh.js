@@ -12,13 +12,17 @@ class Mesh {
     this.rawModel = new RawModel();
   }
 
-  loadRawModel(stringdata, callback) {
-    this.rawModel.parse(stringdata);
+  setData() {
     this.positions = this.rawModel.positions;
     this.normals = this.rawModel.normals;
     this.texCoords = this.rawModel.texCoords;
     this.indices = this.rawModel.indices;
     this.indicesCount = this.rawModel.indicesCount;
+  }
+
+  loadRawModel(stringdata, callback) {
+    this.rawModel.parse(stringdata);
+    this.setData();
 
     this.initBuffers();
     callback && callback();

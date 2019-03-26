@@ -33,9 +33,25 @@
     <i class="fa fa-2x fa-play"></i>
   </button>
 
-  <main class="wrapper">
-    <div id="left">
-      <section class="ui-settings">
+  <section class="ui-menu" id="ui-menu">
+    <div class="ui-menu__item">
+      <button class="ui-menu__button"><i class="fas fa-file-upload"></i></button>
+      <div class="ui-menu__dropdown">
+        <label class="range-slider _file">
+          <input class="file-input" type="file" id="file-load" />
+        </label>
+        <label class="range-slider _file">
+          <input class="file-input model-load" type="file" id="model-load" />
+        </label>
+      </div>
+    </div>
+    <div class="ui-menu__item">
+      <button class="ui-menu__button"><i class="fas fa-sync-alt"></i></button>
+      <div class="ui-menu__dropdown">
+        <label class="range-slider">
+          <input id="auto-rotate" type="checkbox" name="check" checked />
+          <span class="label-text">Auto Rotate</span>
+        </label>
         <label class="range-slider">
           <input class="range-slider__range" id="rot-x" type="range" value="0.01" min="0" max="1" step="0.01">
           <span class="range-slider__text">Rotation X</span>
@@ -44,29 +60,30 @@
           <input class="range-slider__range" id="rot-y" type="range" value="0.01" min="0" max="1" step="0.01">
           <span class="range-slider__text">Rotation Y</span>
         </label>
-        <label class="range-slider">
-          <input class="file-input" type="file" id="file-load" />
-        </label>
-        <label class="range-slider">
-          <input class="file-input model-load" type="file" id="model-load" />
-        </label>
-        <label class="range-slider">
-          <select class="select-box" type="file" id="select-box">
-            <option value="default">Default</option>
-            <option value="fire_grid">Fire Grid</option>
-            <option value="circle_spiral">Circle Spiral</option>
-            <option value="shader_ball">Shader Balls</option>
-            <option value="light_show">Light Show</option>
-            <select>
-        </label>
-        <label class="range-slider">
-          <select class="select-box" type="file" id="select-model">
-            <option value="CUBE">Cube</option>
-            <option value="SPHERE">Sphere</option>
-            <option value="TORUS">Torus</option>
-            <select>
-        </label>
-      </section>
+      </div>
+    </div>
+    <div class="ui-menu__item">
+      <select class="select-box" type="file" id="select-model">
+        <option value="CUBE">Cube</option>
+        <option value="SPHERE">Sphere</option>
+        <option value="TORUS">Torus</option>
+        <option value="TEAPOT">Teapot</option>
+      </select>
+    </div>
+    <div class="ui-menu__item">
+      <select class="select-box" type="file" id="select-box">
+        <option value="default">Default Shader</option>
+        <option value="fire_grid">Fire Grid</option>
+        <option value="circle_spiral">Circle Spiral</option>
+        <option value="shader_ball">Shader Balls</option>
+        <option value="light_show">Light Show</option>
+        <option value="specular">Specular</option>
+      </select>
+    </div>
+  </section>
+
+  <main class="wrapper">
+    <div id="left">
       <section class="canvas-wrapper">
         <canvas id="c"></canvas>
       </section>
@@ -95,8 +112,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/snippets/glsl.js"></script>
 
   <script src="./js/utils.js"></script>
-  <script src="./js/RawModel.js"></script>
   <script src="./js/helpers.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/Camera.js"></script>
+  <script src="./js/RawModel.js"></script>
   <script src="./js/Shader.js"></script>
   <script src="./js/Mesh.js"></script>
   <script src="./index.js"></script>

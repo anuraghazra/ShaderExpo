@@ -1,16 +1,7 @@
 ///<reference path="webgl.d.ts" />
 window.onload = function () {
-  const width = window.innerWidth / 2;
-  const height = window.innerHeight;
-  let t0 = Date.now() / 1000.0; // time
-  const glcanvas = document.getElementById('c');
-  glcanvas.width = width;
-  glcanvas.height = height;
-  /**
-   * @type WebGLRenderingContext
-   */
-  const gl = glcanvas.getContext('webgl');
 
+  // empty shaders
   const vertexShaderValue = `// Vertex Shader
 precision mediump float;
 attribute vec3 aVertexPos;
@@ -25,18 +16,18 @@ uniform float uTime;
 varying vec3 vNorm; 
 varying vec2 vTexCoord;
 
+
 void main() {
   gl_Position = uProjMatrix * uViewMatrix * uWorldMatrix * vec4(aVertexPos, 1.0);
-  
   vNorm = (uWorldMatrix * vec4(aNormal, 0.0)).xyz;
   vTexCoord = aTexCoord;
 }
-`
+`;
   const fragmentShaderValue = `// Fragment Shader
 precision mediump float;
 
 varying vec2 vTexCoord;
-varying vec3 vNorm; 
+varying vec3 vNorm;
 
 uniform vec2 mouse;
 uniform float uTime;
@@ -44,7 +35,7 @@ uniform sampler2D texture;
 
 void main() {
   vec4 texel = texture2D(texture, vTexCoord);
-  
+
   vec3 ambientIntensity = vec3(0.5);
   vec3 sunIntensity = vec3(1.0, 1.0, 1.0);
   vec3 sunDirection = normalize(vec3(-1.0, 2.0, -1.1));
@@ -55,8 +46,15 @@ void main() {
 }
 `;
 
+  // init gl
+  const glcanvas = document.getElementById('c');
+  const gl = glcanvas.getContext('webgl');
+  const width = window.innerWidth / 2;
+  const height = window.innerHeight;
+  glcanvas.width = width;
+  glcanvas.height = height;
 
-  // CODE EDITOR
+  // DOM Variables
   const DOMPreloader = id('preloader');
   const DOMRotX = id('rot-x');
   const DOMRotY = id('rot-y');
@@ -69,8 +67,12 @@ void main() {
   const DOMVertexDiv = id('vertex-shader-code');
   const DOMFragmentDiv = id('fragment-shader-code');
   const DOMLiveEdit = id('live-edit');
+  const DOMRotate = id('auto-rotate');
+
   DOMPreloader.classList.add('hide');
-  let editorSetting = {
+
+  // CODE Editor
+  const editorSetting = {
     enableBasicAutocompletion: true,
     enableSnippets: true,
     enableLiveAutocompletion: true,
@@ -79,16 +81,16 @@ void main() {
     theme: "ace/theme/dracula",
     mode: "ace/mode/glsl"
   }
-  var editorVertex = ace.edit("vertex-shader-code");
-  var editorFragment = ace.edit("fragment-shader-code");
+  const editorVertex = ace.edit("vertex-shader-code");
+  const editorFragment = ace.edit("fragment-shader-code");
   editorVertex.setOptions(editorSetting);
   editorFragment.setOptions(editorSetting);
   editorVertex.session.setValue(vertexShaderValue, 1);
   editorFragment.session.setValue(fragmentShaderValue, 1);
 
-
   let image = loadImage('./assets/textures/wood.jpg', main);
-  // Main function which runs once
+
+  // Main Run
   function main() {
     DOMVertexDiv.addEventListener('keyup', function () {
       DOMLiveEdit.checked && compile();
@@ -148,24 +150,22 @@ void main() {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
 
     // INTIALIZE VARIABLES
     let RAf;
-    const fieldOfView = glMatrix.toRadian(45); // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 1000.0;
-    // init matrices
-    let worldMatrix = mat4.create();
-    let viewMatrix = mat4.create();
-    let projMatrix = mat4.create();
+    let timeStart = Date.now() / 1000.0; // time
+    let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    let camera = new Camera([0, 0, -8], aspect);
+
     // init texture
     let texture = gl.createTexture();
     renderTexture(gl, texture, image);
+
     // init mesh
     let mesh = new Mesh(gl);
-    // let model = new RawModel();
+    mesh.initBuffers();
 
     DOMLoadModel.addEventListener('change', function (evt) {
       let tgt = evt.target || window.event.srcElement;
@@ -178,6 +178,7 @@ void main() {
       if (FileReader && files && files.length) {
         let fr = new FileReader();
         fr.onload = function () {
+          cancelAnimationFrame(RAf);
           mesh.loadRawModel(fr.result);
           compile();
           animate();
@@ -185,10 +186,19 @@ void main() {
         fr.readAsText(files[0]);
       }
     });
-    
-    mesh.initBuffers();
+
     // init shader
     let shader = new Shader(gl);
+
+    // init matrices
+    let worldMatrix = mat4.create();
+    let viewMatrix = mat4.create();
+    let projMatrix = mat4.create();
+    function setMatrices() {
+      gl.uniformMatrix4fv(shader.uniforms.uWorldMatrix, false, worldMatrix);
+      gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, viewMatrix);
+      gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, projMatrix);
+    }
 
 
     /**
@@ -213,26 +223,19 @@ void main() {
 
       // bind buffer
       mesh.enableAttribs(shader.attribs.aVertexPos, shader.attribs.aNormal, shader.attribs.aTexCoord);
-
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.buffers.indices);
 
       // init and set matrices
-      mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0]);
-      mat4.perspective(projMatrix, fieldOfView, aspect, zNear, zFar);
-      gl.uniform2fv(shader.uniforms.resolution, [gl.canvas.width, gl.canvas.height]);
-    }
+      camera.lookAt(viewMatrix).perspective(projMatrix);
 
-    function setMatrices() {
-      gl.uniformMatrix4fv(shader.uniforms.uWorldMatrix, false, worldMatrix);
-      gl.uniformMatrix4fv(shader.uniforms.uViewMatrix, false, viewMatrix);
-      gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, projMatrix);
+      gl.uniform2fv(shader.uniforms.resolution, [gl.canvas.width, gl.canvas.height]);
     }
 
     window.addEventListener('mousemove', function (e) {
       gl.uniform2fv(shader.uniforms.mouse, [e.offsetX, e.offsetY]);
     });
 
-
+    // Select Model From DropDown
     DOMModel.addEventListener('input', function (e) {
       cancelAnimationFrame(RAf);
       switch (e.target.value) {
@@ -248,10 +251,44 @@ void main() {
           mesh = new Torus(gl);
           mesh.initBuffers();
           break;
+        case 'TEAPOT':
+          mesh.rawModel.loadFromUrl('./assets/models/teapot.obj', function () {
+            cancelAnimationFrame(RAf);
+            mesh.setData();
+            mesh.initBuffers();
+            compile();
+            animate();
+          })
+          break;
       }
       compile();
       animate();
+    });
+
+
+    let MOUSE_DOWN = false;
+    let camAngleY = 0;
+    let camAngleX = 0;
+    let offset = { x: 0, y: 0 };
+    glcanvas.addEventListener('mousedown', function (e) {
+      MOUSE_DOWN = true;
+      offset.x = e.offsetX;
+      offset.y = e.offsetY;
     })
+    glcanvas.addEventListener('mouseup', function (e) {
+      MOUSE_DOWN = false;
+      offset.x = e.offsetX;
+      offset.y = e.offsetY;
+    })
+    glcanvas.addEventListener('mousemove', function (e) {
+      if (!MOUSE_DOWN) return;
+      camAngleX = e.offsetX - offset.x;
+      camAngleY = e.offsetY - offset.y;
+      mat4.rotate(worldMatrix, worldMatrix, glMatrix.toRadian(camAngleX), [0, 1, 0]);
+      mat4.rotate(worldMatrix, worldMatrix, glMatrix.toRadian(camAngleY), [-1, 0, 0]);
+      offset.x = e.offsetX;
+      offset.y = e.offsetY;
+    });
 
     // -- draw
     compile();
@@ -260,11 +297,16 @@ void main() {
       gl.clearColor(0, 0, 0, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      gl.uniform1f(shader.uniforms.uTime, (Date.now() / 1000.0) - t0);
+      // camera position
+      gl.uniform3fv(shader.uniforms.viewPos, camera.position);
 
-      mat4.rotate(worldMatrix, worldMatrix, DOMRotX.value, [0, 1, 0]);
-      mat4.rotate(worldMatrix, worldMatrix, DOMRotY.value, [1, 0, 0]);
+      gl.uniform1f(shader.uniforms.uTime, (Date.now() / 1000.0) - timeStart);
+      if (DOMRotate.checked && !MOUSE_DOWN) {
+        mat4.rotate(worldMatrix, worldMatrix, DOMRotX.value, [0, 1, 0]);
+        mat4.rotate(worldMatrix, worldMatrix, DOMRotY.value, [-1, 0, 0]);
+      }
 
+      // init and set matrices
       setMatrices();
       gl.drawElements(gl.TRIANGLES, mesh.indicesCount, gl.UNSIGNED_SHORT, 0);
       RAf = requestAnimationFrame(animate);

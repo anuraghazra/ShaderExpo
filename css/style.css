@@ -10,6 +10,12 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.ace_highlight-marker {
+  position: absolute;
+  background: rgba(255, 0, 0, 0.3);
+  z-index: 1000;
+}
+
 .preloader {
   display: flex;
   text-align: center;
@@ -18,7 +24,7 @@ body {
   top: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #7543fe;
+  background-color: #282a36;
   color: white;
   z-index: 1000;
 }
@@ -29,9 +35,9 @@ body {
 
 .loader {
   margin: 20px;
-  border: 10px solid #f3f3f3;
+  border: 8px solid #f3f3f3;
   border-radius: 50%;
-  border-top: 10px solid #b59aff;
+  border-top: 8px solid #7543fe;
   width: 80px;
   height: 80px;
   animation: spin 2s linear infinite;
@@ -53,7 +59,7 @@ body {
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(117, 67, 254, 0.384);
+  background-color: rgba(79, 79, 105, 0.74);
 }
 
 .loader-shader {
@@ -61,8 +67,9 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
+  z-index: 10;
 }
 
 .hide {
@@ -75,12 +82,16 @@ body {
   padding: 10px;
   width: 50%;
   left: 0;
-  top: 0;
+  top: 30px;
   color: white;
   overflow: auto;
   font-size: 14px;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: #4f4f69;
   font-family: 'consolas';
+}
+
+.show {
+  display: block;
 }
 
 .wrapper {
@@ -95,11 +106,8 @@ body {
   position: relative;
 }
 
-.show {
-  display: block;
-}
-
 .right {
+  margin-top: 30px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -202,7 +210,7 @@ canvas {
   width: 100%;
   height: 5px;
   border-radius: 5px;
-  background: #d7dcdf;
+  background: #fff;
   outline: none;
   padding: 0;
   margin: 0;
@@ -214,7 +222,7 @@ canvas {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #2c3e50;
+  background: #b59aff;
   cursor: pointer;
   transition: background 0.15s ease-in-out;
 }
@@ -246,11 +254,11 @@ canvas {
 }
 
 .range-slider__range:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7543fe;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 2px #7543fe;
 }
 
 ::-moz-range-track {
-  background: #d7dcdf;
+  background: #fff;
   border: 0;
 }
 
@@ -262,7 +270,7 @@ input::-moz-focus-outer {
 /* ------ FILE  */
 
 .file-input {
-  margin-top: 10px;
+  width: 100%;
   color: transparent;
 }
 
@@ -277,6 +285,7 @@ input::-moz-focus-outer {
 .file-input::before {
   content: 'Load Texture';
   color: #656565;
+  width: 100%;
   display: inline-block;
   background: white;
   font-size: 0.8em;
@@ -305,13 +314,11 @@ input::-moz-focus-outer {
 /* SELECT BOX */
 
 .select-box {
-  font-size: 0.8em;
-  margin-top: 10px;
   width: 100%;
   padding: 5px;
   outline: none;
-  border: 1px solid #383A3F;
-  border-radius: 5px;
+  border: none;
+  cursor: pointer;
 }
 
 /* CHECKBOX */
@@ -365,4 +372,95 @@ input[type="checkbox"]:disabled+.label-text:before {
   100% {
     transform: scale(1);
   }
+}
+
+/* UI MENU */
+
+.ui-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0 10px;
+  color: white;
+  width: 100%;
+  height: 30px;
+  background-color: #282a36;
+  /* display: flex; */
+}
+
+.show {
+  display: block !important;
+}
+
+.ui-menu__item {
+  float: left;
+  margin-left: 5px;
+  position: relative;
+  /* flex: 1; */
+  color: white;
+  width: fit-content;
+  height: 100%;
+}
+
+.ui-menu__dropdown {
+  position: absolute;
+  left: 0;
+  z-index: 100;
+  width: 150px;
+  padding: 10px 10px 5px;
+  border-radius: 0 0 5px 5px;
+  background-color: #4f4f69;
+  display: none;
+}
+
+.ui-menu__dropdown .range-slider {
+  font-size: 0.8em;
+  color: white;
+}
+
+.ui-menu__dropdown .range-slider._file {
+  height: 30px;
+}
+
+.ui-menu__dropdown input[type="checkbox"]+.label-text:hover:before {
+  color: white;
+}
+
+.ui-menu__dropdown input[type="checkbox"]:checked+.label-text:before {
+  content: "";
+  color: white;
+  animation: tick 150ms ease-in;
+}
+
+.ui-menu__button {
+  /* color: #2c3e50; */
+  min-width: 30px;
+  width: auto;
+  height: 100%;
+  background-color: #4f4f69;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.ui-menu__button i {
+  pointer-events: none;
+}
+
+.ui-menu__item select {
+  height: 100%;
+  color: white;
+  background-color: #4f4f69;
+}
+
+.ui-menu__item select:hover {
+  background-color: #7543fe;
+  color: white;
+}
+
+.ui-menu__button:hover {
+  background-color: #7543fe;
+  color: white;
 }

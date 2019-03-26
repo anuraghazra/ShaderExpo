@@ -7,7 +7,7 @@ class RawModel {
     this.indices = [];
     this.indicesCount = null;
     this.texCoorDim = 0;
-    url && this.loadGeometry(cb);
+    url && this.loadFromUrl(url, cb);
   }
 
   parse(data, cb) {
@@ -20,14 +20,16 @@ class RawModel {
 
     cb && cb();
   }
-  loadGeometry(cb) {
-    fetch(this.url)
+
+
+  loadFromUrl(url, cb) {
+    fetch(url)
       .then(e => e.text())
       .then(data => {
         // const objFile = new OBJFile(data);
-        this.parse(data);
-
-        cb && cb();
+        this.parse(data, function() {
+          cb && cb();
+        });
       })
   }
 
