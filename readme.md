@@ -43,6 +43,8 @@ Experiment with basic webgl shaders on the fly.
 
 Contributions are welcome.
 
+Example Shaders are taken from https://glslsandbox.com
+
 :star: Support the project by giving it a star :star:
 
 ## :octocat: Author

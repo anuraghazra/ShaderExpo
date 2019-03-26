@@ -11,6 +11,7 @@ attribute vec2 aTexCoord;
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
+// errors
 uniform float uTime;
 
 varying vec3 vNorm; 
@@ -81,23 +82,28 @@ void main() {
     theme: "ace/theme/dracula",
     mode: "ace/mode/glsl"
   }
-  const editorVertex = ace.edit("vertex-shader-code");
-  const editorFragment = ace.edit("fragment-shader-code");
-  editorVertex.setOptions(editorSetting);
-  editorFragment.setOptions(editorSetting);
-  editorVertex.session.setValue(vertexShaderValue, 1);
-  editorFragment.session.setValue(fragmentShaderValue, 1);
+  // const editorVertex = ace.edit("vertex-shader-code");
+  // const editorFragment = ace.edit("fragment-shader-code");
+  // editorVertex.setOptions(editorSetting);
+  // editorFragment.setOptions(editorSetting);
+  // editorVertex.session.setValue(vertexShaderValue, 1);
+  // editorFragment.session.setValue(fragmentShaderValue, 1);
+
+  const editorVertex = new Editor('vertex-shader-code');
+  const editorFragment = new Editor('fragment-shader-code');
+  editorVertex.setValue(vertexShaderValue);
+  editorFragment.setValue(fragmentShaderValue);
 
   let image = loadImage('./assets/textures/wood.jpg', main);
 
   // Main Run
   function main() {
-    DOMVertexDiv.addEventListener('keyup', function () {
+    DOMVertexDiv.addEventListener('keyup', debounce(function () {
       DOMLiveEdit.checked && compile();
-    })
-    DOMFragmentDiv.addEventListener('keyup', function () {
+    }, 500));
+    DOMFragmentDiv.addEventListener('keyup', debounce(function () {
       DOMLiveEdit.checked && compile();
-    })
+    }, 500))
     DOMRun.addEventListener('click', compile);
     DOMFile.addEventListener('change', function (evt) {
       let tgt = evt.target || window.event.srcElement;
@@ -132,8 +138,8 @@ void main() {
       let value = e.target.value;
       let path = './assets/shaders/' + value;
       fetchShader(path, (vert, frag) => {
-        editorVertex.session.setValue(vert, 1);
-        editorFragment.session.setValue(frag, 1);
+        editorVertex.setValue(vert);
+        editorFragment.setValue(frag);
         DOMVertexDiv.removeChild(loader);
         DOMFragmentDiv.removeChild(loader2);
         DOMVertexDiv.classList.remove('shader-loading');
@@ -200,7 +206,6 @@ void main() {
       gl.uniformMatrix4fv(shader.uniforms.uProjMatrix, false, projMatrix);
     }
 
-
     /**
      * @method compile 
      * recompiles the code everytime when any change has happen in shaders
@@ -213,11 +218,38 @@ void main() {
       // create, compile, check shaders
       shader.setShaders(vShader, fShader);
       shader.init();
-      shader.getShaderVariables();
-      showErrors(shader.errors, DOMError);
-      if (shader.errors.length > 0) {
-        return;
+
+      // Show Errors in the editor
+      editorVertex.annotations = [];
+      editorFragment.annotations = [];
+      if (shader.isVertexShaderError) {
+        shader.vertexShaderErrors.line.forEach((e, index) => {
+          editorVertex.setAnnotations({
+            row: e - 1,
+            text: shader.vertexShaderErrors.msg[index],
+            type: "error"
+          })
+        })
+        shader.isVertexShaderError = false;
       }
+      if (shader.isFragmentShaderError) {
+        shader.fragmentShaderErrors.line.forEach((e, index) => {
+          editorFragment.setAnnotations({
+            row: e - 1,
+            text: shader.fragmentShaderErrors.msg[index],
+            type: "error"
+          })
+        })
+        shader.isFragmentShaderError = false;
+      }
+
+      editorVertex.showAnnotations();
+      editorFragment.showAnnotations();
+      if (shader.isVertexShaderError || shader.isFragmentShaderError) {
+        return false;
+      };
+
+      shader.getShaderVariables();
       gl.useProgram(shader.program);
 
 

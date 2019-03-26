@@ -12,7 +12,10 @@ class Shader {
 
     this.program = null;
 
-    this.errors = [];
+    this.isVertexShaderError = false;
+    this.isFragmentShaderError = false;
+    this.fragmentShaderErrors = [];
+    this.vertexShaderErrors = [];
   }
 
 
@@ -21,11 +24,13 @@ class Shader {
     this.vertexShader = this.createShader(this.gl.VERTEX_SHADER, this.vShader);
     this.fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, this.fShader);
 
-    this.errors = [this.vertexShader.error, this.fragmentShader.error];
-    if (!(this.vertexShader.error || this.fragmentShader.error)) {
-      this.createProgram();
-      this.errors = [];
-    }
+    if (this.isFragmentShaderError) {
+      return;
+    };
+    if (this.isVertexShaderError) {
+      return;
+    };
+    this.createProgram();
   }
 
   createProgram() {
@@ -33,6 +38,7 @@ class Shader {
     this.gl.attachShader(this.program, this.vertexShader);
     this.gl.attachShader(this.program, this.fragmentShader);
     this.gl.linkProgram(this.program);
+
     if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) {
       console.warn('Unable to initialize program ' + this.gl.getProgramInfoLog(this.program));
       return null;
@@ -60,17 +66,30 @@ class Shader {
     this.errors = [];
   }
 
+
   /**
    * @method getShaderError
    * @param {WebGLShader} shader 
    * @param {String} shaderString 
    */
   getShaderError(shader, shaderString) {
+    // let codeline = errorline + ' : ' + shaderString.split('\n')[errorline - 1].trim();
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      let errorline = +this.gl.getShaderInfoLog(shader).match(/ERROR:\s\d+:(\d+):/)[1];
-      let codeline = errorline + ' : ' + shaderString.split('\n')[errorline - 1].trim();
+      let lines = [];
+      let reg = /ERROR:\s\d+:(\d+):/img;
+      let errorMsg = this.gl.getShaderInfoLog(shader);
 
-      return [this.gl.getShaderInfoLog(shader), '------', '> ' + codeline, '------'].join('\n');
+      errorMsg.replace(reg, function (match, g1, g2) {
+        lines.push((+g1));
+      });
+      let message = this.gl.getShaderInfoLog(shader);
+      message = message.split('\n');
+      message.pop();
+
+      return {
+        msg: message,
+        line: lines
+      };
     }
   }
 
@@ -85,12 +104,20 @@ class Shader {
     this.gl.compileShader(shader);
     // Check For Shader Errors
     let error = this.getShaderError(shader, source);
-    let name = (type == this.gl.VERTEX_SHADER) ? 'VERTEX_SHADER ' : 'FRAGMENT_SHADER ';
+    let name = (type == this.gl.VERTEX_SHADER) ? 'VERTEX_SHADER' : 'FRAGMENT_SHADER';
 
     if (error) {
-      console.warn(error);
-      return { error: '\n' + name + '\n' + error };
+      error.type = name;
+      if (error.type === 'VERTEX_SHADER') {
+        this.vertexShaderErrors = error;
+        this.isVertexShaderError = true;
+      } else {
+        this.fragmentShaderErrors = error;
+        this.isFragmentShaderError = true;
+      }
+      return null;
     }
+
     return shader;
   }
 
