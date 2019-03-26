@@ -64,7 +64,6 @@ void main() {
   const DOMSelect = id('select-box');
   const DOMModel = id('select-model');
   const DOMRun = id('run-shader');
-  const DOMError = id('error-msg');
   const DOMVertexDiv = id('vertex-shader-code');
   const DOMFragmentDiv = id('fragment-shader-code');
   const DOMLiveEdit = id('live-edit');
