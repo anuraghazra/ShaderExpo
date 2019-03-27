@@ -237,31 +237,28 @@ class Plane extends Mesh {
 
   createGeometry(options) {
     options = options || {};
-
-
     let positions = new Float32Array([
-      -1.0, 1.0, 1.0,
-      1.0, 1.0, 1.0,
-      -1.0, -1.0, 1.0,
-      1.0, -1.0, 1.0,
+      1, 1, 1,
+      -1, -1, 1,
+      -1, 1, 1,
+      1, -1, 1,
     ]);
     let normals = new Float32Array([
-      1.0, 1.0, 1.0,
-      -1.0, -1.0, -1.0,
-      1.0, 0.0, 1.0,
-      0.0, 0.0, 1.0
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
     ]);
     let texCoords = new Float32Array([
-      0.0, 0.0,
       1.0, 0.0,
       0.0, 1.0,
-      1.0, 1.0
+      0.0, 0.0,
+      1.0, 1.0,
     ]);
     let indices = new Uint16Array([
-      -1.0, 1.0, 1.0,
-      1.0, 1.0, 1.0,
-      -1.0, -1.0, 1.0,
-      1.0, -1.0, 1.0,
+      0, 1,
+      2, 0,
+      3, 1,
     ]);
 
     this.indicesCount = indices.length;

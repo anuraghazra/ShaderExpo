@@ -11,12 +11,10 @@ attribute vec2 aTexCoord;
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
-// errors
 uniform float uTime;
 
 varying vec3 vNorm; 
 varying vec2 vTexCoord;
-
 
 void main() {
   gl_Position = uProjMatrix * uViewMatrix * uWorldMatrix * vec4(aVertexPos, 1.0);
@@ -262,6 +260,10 @@ void main() {
           break;
         case 'SPHERE':
           mesh = new Sphere(gl);
+          mesh.initBuffers();
+          break;
+        case 'PLANE':
+          mesh = new Plane(gl);
           mesh.initBuffers();
           break;
         case 'TORUS':
