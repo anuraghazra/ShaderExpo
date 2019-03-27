@@ -117,6 +117,15 @@ body {
   height: 50%;
 }
 
+
+#fps-counter {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 1;
+  color :#b59aff;
+  font-size: 12px;
+}
 canvas {
   outline: 1px solid black;
 }

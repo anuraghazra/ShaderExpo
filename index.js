@@ -66,6 +66,7 @@ void main() {
   const DOMFragmentDiv = id('fragment-shader-code');
   const DOMLiveEdit = id('live-edit');
   const DOMRotate = id('auto-rotate');
+  const DOMFps = id('fps-counter');
 
   DOMPreloader.classList.add('hide');
 
@@ -288,9 +289,26 @@ void main() {
     // -- draw
     compile();
     animate();
-    function animate() {
+    
+    // FPS  
+    var PREV_TIME = 0;
+    var FRAME_TIME = 0;
+    var FRAMES = 0;
+    function animate(time) {
+      var dt = (time - PREV_TIME);
+
       gl.clearColor(0, 0, 0, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      // FPS
+      PREV_TIME = time;
+      FRAME_TIME += dt;
+      FRAMES++;
+      if (FRAME_TIME > 1000) {
+        var fps = 1000 * FRAMES / FRAME_TIME;
+        DOMFps.innerHTML = Math.round(fps) + " FPS";
+        FRAME_TIME = FRAMES = 0;
+      }
 
       // camera position
       gl.uniform3fv(shader.uniforms.viewPos, camera.position);
