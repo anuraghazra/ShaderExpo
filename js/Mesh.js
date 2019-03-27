@@ -105,17 +105,16 @@ class Mesh {
     this.indicesCount = indices.length;
 
     return { positions, normals, texCoords, indices };
-
   }
 
   initBuffers() {
     this.buffers.position = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.positions);
     this.buffers.normal = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.normals);
     this.buffers.texture = createBuffer(this.gl, this.gl.ARRAY_BUFFER, this.texCoords);
+    this.buffers.indices = createBuffer(this.gl, this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
     this.buffers.position.numItems = 3;
     this.buffers.normal.numItems = 3;
     this.buffers.texture.numItems = 2;
-    this.buffers.indices = createBuffer(this.gl, this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
   }
 
   unbindBuffers() {

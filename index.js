@@ -72,22 +72,6 @@ void main() {
   DOMPreloader.classList.add('hide');
 
   // CODE Editor
-  const editorSetting = {
-    enableBasicAutocompletion: true,
-    enableSnippets: true,
-    enableLiveAutocompletion: true,
-    tabSize: 2,
-    useSoftTabs: true,
-    theme: "ace/theme/dracula",
-    mode: "ace/mode/glsl"
-  }
-  // const editorVertex = ace.edit("vertex-shader-code");
-  // const editorFragment = ace.edit("fragment-shader-code");
-  // editorVertex.setOptions(editorSetting);
-  // editorFragment.setOptions(editorSetting);
-  // editorVertex.session.setValue(vertexShaderValue, 1);
-  // editorFragment.session.setValue(fragmentShaderValue, 1);
-
   const editorVertex = new Editor('vertex-shader-code');
   const editorFragment = new Editor('fragment-shader-code');
   editorVertex.setValue(vertexShaderValue);
@@ -163,6 +147,8 @@ void main() {
     let timeStart = Date.now() / 1000.0; // time
     let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     let camera = new Camera([0, 0, -8], aspect);
+    let mouse = new Mouse(glcanvas);
+
 
     // init texture
     let texture = gl.createTexture();
@@ -297,30 +283,6 @@ void main() {
     });
 
 
-    let MOUSE_DOWN = false;
-    let camAngleY = 0;
-    let camAngleX = 0;
-    let offset = { x: 0, y: 0 };
-    glcanvas.addEventListener('mousedown', function (e) {
-      MOUSE_DOWN = true;
-      offset.x = e.offsetX;
-      offset.y = e.offsetY;
-    })
-    glcanvas.addEventListener('mouseup', function (e) {
-      MOUSE_DOWN = false;
-      offset.x = e.offsetX;
-      offset.y = e.offsetY;
-    })
-    glcanvas.addEventListener('mousemove', function (e) {
-      if (!MOUSE_DOWN) return;
-      camAngleX = e.offsetX - offset.x;
-      camAngleY = e.offsetY - offset.y;
-      mat4.rotate(worldMatrix, worldMatrix, glMatrix.toRadian(camAngleX), [0, 1, 0]);
-      mat4.rotate(worldMatrix, worldMatrix, glMatrix.toRadian(camAngleY), [-1, 0, 0]);
-      offset.x = e.offsetX;
-      offset.y = e.offsetY;
-    });
-
     // -- draw
     compile();
     animate();
@@ -330,12 +292,17 @@ void main() {
 
       // camera position
       gl.uniform3fv(shader.uniforms.viewPos, camera.position);
-
       gl.uniform1f(shader.uniforms.uTime, (Date.now() / 1000.0) - timeStart);
-      if (DOMRotate.checked && !MOUSE_DOWN) {
-        mat4.rotate(worldMatrix, worldMatrix, DOMRotX.value, [0, 1, 0]);
-        mat4.rotate(worldMatrix, worldMatrix, DOMRotY.value, [-1, 0, 0]);
+
+      // mouse acceleration
+      mouse.accelerate();
+      if (DOMRotate.checked && !mouse.isDown) {
+        mouse.THETA += +(DOMRotX.value);
+        mouse.PHI += +(DOMRotY.value);
       }
+      mat4.identity(worldMatrix);
+      mat4.rotate(worldMatrix, worldMatrix, mouse.THETA, [0, 1, 0]);
+      mat4.rotate(worldMatrix, worldMatrix, mouse.PHI, [-1, 0, 0]);
 
       // init and set matrices
       setMatrices();

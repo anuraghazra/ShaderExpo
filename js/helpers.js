@@ -1,24 +1,48 @@
-// function showErrors(errors, DOMError) {
-//   // console.log(errors)
-//   if (errors[0] || errors[1]) {
-//     DOMError.classList.add('show');
+/**
+ * @class Mouse
+ * @param {HTMLCanvasElement} canvas
+ */
+class Mouse {
+  constructor(canvas) {
+    this.isDown = false;
+    this.ACCELERATION = 0.96;
+    this.old = { x: 0, y: 0 };
+    this.pos = { x: 0, y: 0 };
+    this.THETA = 0;
+    this.PHI = 0;
 
-//     let verr = errors[0] && errors[0][0].msg || '';
-//     let ferr = errors[1] && errors[1][0].msg || '';
-//     let error = verr + ferr;
-//     // console.log(error)
-//     // '------', '> ' + codeline, '------'
-//     DOMError.innerText = error;
+    canvas.addEventListener('mousedown', (e) => {
+      this.isDown = true;
+      this.old.x = e.pageX;
+      this.old.y = e.pageY;
+    })
+    canvas.addEventListener('mouseup', (e) => {
+      this.isDown = false;
+      this.old.x = e.pageX;
+      this.old.y = e.pageY;
+    })
+    canvas.addEventListener('mousemove', (e) => {
+      if (!this.isDown) return;
+      this.pos.x = (e.pageX - this.old.x) * 2 * Math.PI / canvas.width;
+      this.pos.y = (e.pageY - this.old.y) * 2 * Math.PI / canvas.height;
+      this.THETA += this.pos.x;
+      this.PHI += this.pos.y;
+      this.old.x = e.pageX;
+      this.old.y = e.pageY;
+    });
+  }
 
-//     return error;
-//   } else {
-//     DOMError.classList.remove('show');
-//   }
+  accelerate() {
+    if (!this.isDown) {
+      this.pos.x *= this.ACCELERATION;
+      this.pos.y *= this.ACCELERATION;
+      this.THETA += this.pos.x;
+      this.PHI += this.pos.y;
+    }
+  }
+}
 
-//   return false;
-// }
-
-const debounce = (func, delay) => {
+function debounce(func, delay) {
   let debounceTimer
   return function () {
     const context = this
@@ -28,6 +52,7 @@ const debounce = (func, delay) => {
       = setTimeout(() => func.apply(context, args), delay)
   }
 }
+
 function fetchShader(path, callback) {
   fetch(path + '/index.vs.glsl')
     .then(res => res.text())
