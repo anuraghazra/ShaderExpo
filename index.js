@@ -67,6 +67,7 @@ void main() {
   const DOMLiveEdit = id('live-edit');
   const DOMRotate = id('auto-rotate');
   const DOMFps = id('fps-counter');
+  const DOMCompileTime = id('compile-time');
 
   DOMPreloader.classList.add('hide');
 
@@ -140,7 +141,7 @@ void main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-
+ 
     // INTIALIZE VARIABLES
     let RAf;
     let timeStart = Date.now() / 1000.0; // time
@@ -195,6 +196,8 @@ void main() {
      * recompiles the code everytime when any change has happen in shaders
      */
     function compile() {
+      var t0 = performance.now(); // compile time start
+
       // get shader code
       let vShader = editorVertex.getValue();
       let fShader = editorFragment.getValue();
@@ -245,6 +248,10 @@ void main() {
       camera.lookAt(viewMatrix).perspective(projMatrix);
 
       gl.uniform2fv(shader.uniforms.resolution, [gl.canvas.width, gl.canvas.height]);
+
+      // compile time
+      var t1 = performance.now();
+      DOMCompileTime.innerText = "Compiled in " + (t1 - t0).toFixed(2)  + " miliseconds"
     }
 
     window.addEventListener('mousemove', function (e) {
@@ -329,7 +336,6 @@ void main() {
       gl.drawElements(gl.TRIANGLES, mesh.indicesCount, gl.UNSIGNED_SHORT, 0);
       RAf = requestAnimationFrame(animate);
     }
-
   }
 
 }

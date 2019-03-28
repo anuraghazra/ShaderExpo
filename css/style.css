@@ -398,6 +398,14 @@ input[type="checkbox"]:disabled+.label-text:before {
   /* display: flex; */
 }
 
+#compile-time {
+  top: 6px;
+  position: absolute;
+  right: 10px;
+  color: #b59aff;
+  font-size: 12px;
+}
+
 .show {
   display: block !important;
 }
