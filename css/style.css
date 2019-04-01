@@ -398,6 +398,33 @@ input[type="checkbox"]:disabled+.label-text:before {
   /* display: flex; */
 }
 
+
+input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #b59aff;
+  border-radius: 3px;
+  outline: none;
+}
+
+.ui-menu__dropdown--button {
+  margin-top: 5px;
+  color: #656565;
+  width: 100%;
+  background: white;
+  font-size: 0.8em;
+  border: 1px solid #383A3F;
+  border-radius: 3px;
+  padding: 5px 8px;
+  outline: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ui-menu__dropdown--button:hover {
+  border-color: #7543fe;
+}
+
 #compile-time {
   top: 6px;
   position: absolute;

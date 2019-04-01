@@ -1,4 +1,10 @@
 ///<reference path="webgl.d.ts" />
+
+/**
+ * @name ShaderExpo
+ * @author <https://github.com/anuraghazra>
+ * @license 
+ */
 window.onload = function () {
 
   // empty shaders
@@ -68,6 +74,8 @@ void main() {
   const DOMRotate = id('auto-rotate');
   const DOMFps = id('fps-counter');
   const DOMCompileTime = id('compile-time');
+  const DOMExport = id('export-html');
+  const DOMExportName = id('export-name');
 
   DOMPreloader.classList.add('hide');
 
@@ -76,6 +84,12 @@ void main() {
   const editorFragment = new Editor('fragment-shader-code');
   editorVertex.setValue(vertexShaderValue);
   editorFragment.setValue(fragmentShaderValue);
+
+  // export as HTML
+  DOMExport.addEventListener('click', function() {
+    let name = DOMExportName.value || 'shaderExpo';
+    exportHTML(name, editorVertex.getValue(), editorFragment.getValue());
+  })
 
   let image = loadImage('./assets/textures/wood.jpg', main);
 

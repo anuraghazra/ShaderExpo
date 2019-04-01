@@ -1,5 +1,10 @@
 # Shader Expo
+[![License: GPL v3](https://img.shields.io/github/license/anuraghazra/ShaderExpo.svg)](https://github.com/anuraghazra/ShaderExpo/blob/master/LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/anuraghazra/ShaderExpo.svg)
+![Maintenance](https://img.shields.io/maintenance/yes/2019.svg)
+
 :sunrise: :rainbow:
+
 
 WebGL Shader Playground.
 
