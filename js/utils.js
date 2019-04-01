@@ -49,9 +49,7 @@ function setVertexAttribPointer(_gl, pos, items, norm, stride, offset) {
 function loadImage(url, callback) {
   let img = new Image();
   // asks for crossOrigin Permission
-  if ((new URL(url)).origin !== window.location.origin) {
-    img.crossOrigin = "";
-  }
+  img.crossOrigin = "";
   img.src = url;
   img.onload = callback;
   return img;
