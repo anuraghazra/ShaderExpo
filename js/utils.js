@@ -78,3 +78,24 @@ function renderTexture(_gl, texture, image) {
 function id(id) {
   return document.getElementById(id);
 }
+
+/**
+ * 
+ * @param {String} vert 
+ * @param {String} frag 
+ */
+function getShaderShareLink(vert, frag) {
+  let finalShader = '';
+  finalShader += vert;
+  finalShader += '\n---FRAG-EXPO-SPLIT---\n'
+  finalShader += frag;
+  let shaderDeflate = pako.deflate(finalShader, { to: 'string' });
+  let shareurl = window.location.href + '?shader=' + btoa(shaderDeflate);
+  return shareurl;
+}
+
+function getShaderFromUrl(urlShader) {
+  let shdr = urlShader.replace(/\s/img, '+');
+  shdr = pako.inflate(atob(shdr), { to: 'string' }).split('\n---FRAG-EXPO-SPLIT---\n');
+  return shdr;
+}

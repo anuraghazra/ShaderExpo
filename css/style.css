@@ -73,7 +73,7 @@ body {
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 .error {
@@ -507,4 +507,41 @@ input[type="text"] {
 .ui-menu__button:hover {
   background-color: #7543fe;
   color: white;
+}
+
+
+.popup-window {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: rgba(40, 42, 54, 0.706);
+  text-align: center;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  color: white;
+}
+.popup-window__innercontent {
+  width: 50%;
+}
+.popup-window__innercontent input {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 0;
+  border: none;
+}
+.popup-window__innercontent--flex {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.popup-window__innercontent--flex button {
+  padding: 10px;
+}
+
+.hidden {
+  display: none;
 }

@@ -19,6 +19,8 @@
 
     gtag('config', 'UA-119972196-1');
   </script>
+  <script src="https://cdn.jsdelivr.net/pako/1.0.3/pako.min.js"></script>
+
 </head>
 
 <body>
@@ -35,7 +37,7 @@
 
   <section class="ui-menu" id="ui-menu">
     <div id="compile-time">compiled in 0.00 miliseconds</div>
-    
+
     <div class="ui-menu__item">
       <button class="ui-menu__button"><i class="fas fa-file-upload"></i></button>
       <div class="ui-menu__dropdown">
@@ -98,7 +100,20 @@
         <option value="rim_light">Rim Light</option>
       </select>
     </div>
+    <div class="ui-menu__item">
+      <button id="share-expo" class="ui-menu__button"><i class="fas fa-share"></i></button>
+    </div>
   </section>
+
+  <div class="popup-window hidden" id="pop-up">
+    <div class="popup-window__innercontent">
+      <p>Share Your Shader.</p>
+      <div class="popup-window__innercontent--flex">
+        <input onclick="event.stopPropagation()" id="share-link" type="text" />
+        <button class="ui-menu__button" id="copy-share-link"><i class="fas fa-copy"></i></button>
+      </div>
+    </div>
+  </div>
 
   <main class="wrapper">
     <div id="left">

@@ -1,16 +1,21 @@
 window.addEventListener('load', initUI);
 
 
+
 function initUI() {
+  const DOMPreloader = id('preloader');
+  DOMPreloader.classList.add('hide');
+
   const DOMMenu = id('ui-menu');
 
   DOMMenu.addEventListener('click', function (e) {
     let target = e.target;
     if (target.tagName === 'BUTTON' && target.className.match('ui-menu__button')) {
       let dropDownContent = e.target.nextElementSibling;
-      dropDownContent.classList.toggle('show');
+      dropDownContent && dropDownContent.classList.toggle('show');
     }
   });
+
 }
 
 
@@ -145,6 +150,7 @@ function exportHTML(name, export_vert, export_frag) {
 </body>
 </html>
 `;
+
   function download(filename, text) {
     var pom = document.createElement('a');
     pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));

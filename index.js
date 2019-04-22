@@ -60,7 +60,6 @@ void main() {
   glcanvas.height = height;
 
   // DOM Variables
-  const DOMPreloader = id('preloader');
   const DOMRotX = id('rot-x');
   const DOMRotY = id('rot-y');
   const DOMFile = id('file-load');
@@ -76,20 +75,53 @@ void main() {
   const DOMCompileTime = id('compile-time');
   const DOMExport = id('export-html');
   const DOMExportName = id('export-name');
+  const DOMShare = id('share-expo');
+  const DOMShareLink = id('share-link');
+  const DOMPopup = id('pop-up');
+  const DOMCopy = id('copy-share-link');
 
-  DOMPreloader.classList.add('hide');
+
+
+  // URL Params
+  let urlParams = new URLSearchParams(window.location.search);
+  let urlShader = urlParams.get('shader') || '';
+  let urlVert;
+  let urlFrag;
+  if (urlShader) {
+    let url_shaders = getShaderFromUrl(urlShader);
+    urlVert = url_shaders[0];
+    urlFrag = url_shaders[1];
+  }
+
+
+  DOMShare.addEventListener('click', function () {
+    DOMPopup.style.display = 'flex';
+    let shareurl = getShaderShareLink(editorVertex.getValue(), editorFragment.getValue());
+    DOMShareLink.value = shareurl;
+  })
+
+  DOMPopup.addEventListener('click', function (e) {
+    DOMPopup.style.display = 'none';
+  });
+
+  DOMCopy.addEventListener('click', function (event) {
+    event.stopPropagation();
+    DOMShareLink.select();
+    document.execCommand("copy");
+  });
+
 
   // CODE Editor
   const editorVertex = new Editor('vertex-shader-code');
   const editorFragment = new Editor('fragment-shader-code');
-  editorVertex.setValue(vertexShaderValue);
-  editorFragment.setValue(fragmentShaderValue);
+  editorVertex.setValue(urlVert || vertexShaderValue);
+  editorFragment.setValue(urlFrag || fragmentShaderValue);
 
   // export as HTML
-  DOMExport.addEventListener('click', function() {
+  DOMExport.addEventListener('click', function () {
     let name = DOMExportName.value || 'shaderExpo';
     exportHTML(name, editorVertex.getValue(), editorFragment.getValue());
-  })
+  });
 
   let image = loadImage('./assets/textures/wood.jpg', main);
 
@@ -100,7 +132,8 @@ void main() {
     }, 500));
     DOMFragmentDiv.addEventListener('keyup', debounce(function () {
       DOMLiveEdit.checked && compile();
-    }, 500))
+    }, 500));
+
     DOMRun.addEventListener('click', compile);
     DOMFile.addEventListener('change', function (evt) {
       let tgt = evt.target || window.event.srcElement;
@@ -145,33 +178,6 @@ void main() {
       })
     });
 
-
-
-    // GL CLEAR -----------
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
- 
-    // INTIALIZE VARIABLES
-    let RAf;
-    let timeStart = Date.now() / 1000.0; // time
-    let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    let camera = new Camera([0, 0, -8], aspect);
-    let mouse = new Mouse(glcanvas);
-
-
-    // init texture
-    let texture = gl.createTexture();
-    renderTexture(gl, texture, image);
-
-    // init mesh
-    let mesh = new Mesh(gl);
-    mesh.initBuffers();
-
     DOMLoadModel.addEventListener('change', function (evt) {
       let tgt = evt.target || window.event.srcElement;
       let files = tgt.files;
@@ -191,6 +197,66 @@ void main() {
         fr.readAsText(files[0]);
       }
     });
+
+    // Select Model From DropDown
+    DOMModel.addEventListener('input', function (e) {
+      cancelAnimationFrame(RAf);
+      switch (e.target.value) {
+        case 'CUBE':
+          mesh = new Mesh(gl);
+          mesh.initBuffers();
+          break;
+        case 'SPHERE':
+          mesh = new Sphere(gl);
+          mesh.initBuffers();
+          break;
+        case 'PLANE':
+          mesh = new Plane(gl);
+          mesh.initBuffers();
+          break;
+        case 'TORUS':
+          mesh = new Torus(gl);
+          mesh.initBuffers();
+          break;
+        case 'TEAPOT':
+          mesh.rawModel.loadFromUrl('./assets/models/teapot.obj', function () {
+            cancelAnimationFrame(RAf);
+            mesh.setData();
+            mesh.initBuffers();
+            compile();
+            animate();
+          })
+          break;
+      }
+      compile();
+      animate();
+    });
+
+
+    // GL CLEAR -----------
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+
+    // INTIALIZE VARIABLES
+    let RAf;
+    let timeStart = Date.now() / 1000.0; // time
+    let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    let camera = new Camera([0, 0, -8], aspect);
+    let mouse = new Mouse(glcanvas);
+
+
+    // init texture
+    let texture = gl.createTexture();
+    renderTexture(gl, texture, image);
+
+    // init mesh
+    let mesh = new Mesh(gl);
+    mesh.initBuffers();
 
     // init shader
     let shader = new Shader(gl);
@@ -265,52 +331,18 @@ void main() {
 
       // compile time
       var t1 = performance.now();
-      DOMCompileTime.innerText = "Compiled in " + (t1 - t0).toFixed(2)  + " miliseconds"
+      DOMCompileTime.innerText = "Compiled in " + (t1 - t0).toFixed(2) + " miliseconds";
     }
 
     window.addEventListener('mousemove', function (e) {
       gl.uniform2fv(shader.uniforms.mouse, [e.offsetX, e.offsetY]);
     });
 
-    // Select Model From DropDown
-    DOMModel.addEventListener('input', function (e) {
-      cancelAnimationFrame(RAf);
-      switch (e.target.value) {
-        case 'CUBE':
-          mesh = new Mesh(gl);
-          mesh.initBuffers();
-          break;
-        case 'SPHERE':
-          mesh = new Sphere(gl);
-          mesh.initBuffers();
-          break;
-        case 'PLANE':
-          mesh = new Plane(gl);
-          mesh.initBuffers();
-          break;
-        case 'TORUS':
-          mesh = new Torus(gl);
-          mesh.initBuffers();
-          break;
-        case 'TEAPOT':
-          mesh.rawModel.loadFromUrl('./assets/models/teapot.obj', function () {
-            cancelAnimationFrame(RAf);
-            mesh.setData();
-            mesh.initBuffers();
-            compile();
-            animate();
-          })
-          break;
-      }
-      compile();
-      animate();
-    });
-
 
     // -- draw
     compile();
     animate();
-    
+
     // FPS  
     var PREV_TIME = 0;
     var FRAME_TIME = 0;
