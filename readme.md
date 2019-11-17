@@ -5,11 +5,12 @@
 
 :sunrise: :rainbow:
 
-
 WebGL Shader Playground.
 
 `ShaderExpo` is purely dependency free shader editor made in Raw WebGL API.
 Experiment with basic webgl shaders on the fly.
+
+Checkout [ShaderExpo Case Study](https://anuraghazra.github.io/case-studies/shader-expo)
 
 ## :file_folder: Features
 - Rich CodeEditor
